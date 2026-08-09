@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Screener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f4f6f8;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="file"], textarea {
+            width: 100%;
+            margin-top: 5px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #2b7cff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1a5edb;
+        }
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #eef3ff;
+            display: none;
+        }
+        .score {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2b7cff;
+        }
+        .skills-list span {
+            display: inline-block;
+            background: #d7f5dd;
+            color: #1e7a34;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin: 4px 4px 0 0;
+            font-size: 13px;
+        }
+        .missing-list span {
+            display: inline-block;
+            background: #fde2e2;
+            color: #b03030;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin: 4px 4px 0 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📄 Resume Screener</h1>
+
+<div class="card">
+    <label for="resume">Upload Resume (PDF or DOCX)</label>
+    <input type="file" id="resume" accept=".pdf,.docx" required>
+
+    <label for="jobDescription">Paste Job Description</label>
+    <textarea id="jobDescription" placeholder="Paste the job description here..."></textarea>
+
+    <button onclick="screenResume()">Screen Resume</button>
+
+    <div id="result">
+        <p>Similarity Score: <span class="score" id="scoreValue"></span></p>
+        <p><strong>Matched Skills:</strong></p>
+        <div class="skills-list" id="matchedSkills"></div>
+        <p style="margin-top:15px;"><strong>Missing Skills:</strong></p>
+        <div class="missing-list" id="missingSkills"></div>
+    </div>
+</div>
+
+<script>
+    async function screenResume() {
+        const resumeFile = document.getElementById('resume').files[0];
+        const jobDescription = document.getElementById('jobDescription').value;
+
+        if (!resumeFile || !jobDescription) {
+            alert('Please upload a resume and enter a job description.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('resume', resumeFile);
+        formData.append('jobDescription', jobDescription);
+
+        try {
+            const response = await fetch('/api/screen', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Server returned an error: ' + response.status);
+            }
+
+            const data = await response.json();
+
+            document.getElementById('scoreValue').textContent = data.similarityScore.toFixed(2);
+
+            const matchedDiv = document.getElementById('matchedSkills');
+            matchedDiv.innerHTML = '';
+            if (data.matchedSkills.length === 0) {
+                matchedDiv.innerHTML = '<em>None found</em>';
+            } else {
+                data.matchedSkills.forEach(skill => {
+                    matchedDiv.innerHTML += `<span>${skill}</span>`;
+                });
+            }
+
+            const missingDiv = document.getElementById('missingSkills');
+            missingDiv.innerHTML = '';
+            if (data.missingSkills.length === 0) {
+                missingDiv.innerHTML = '<em>None — great match!</em>';
+            } else {
+                data.missingSkills.forEach(skill => {
+                    missingDiv.innerHTML += `<span>${skill}</span>`;
+                });
+            }
+
+            document.getElementById('result').style.display = 'block';
+        } catch (err) {
+            alert('Something went wrong: ' + err.message);
+            console.error(err);
+        }
+    }
+</script>
+
+</body>
+</html>
