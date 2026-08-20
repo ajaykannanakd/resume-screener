@@ -262,7 +262,7 @@
     <div class="hero-copy soft-in d1">
       <div class="eyebrow">Built for hiring teams</div>
       <h1>Screen every resume <span class="accent">before your coffee gets cold</span></h1>
-      <p class="sub">Drop in a resume and the job description — get a match score, matched skills, and gaps in seconds. No spreadsheets, no guesswork.</p>
+      <p class="sub">Drop in a resume and the role you're hiring for — get a match score, matched skills, and gaps in seconds. No spreadsheets, no guesswork.</p>
       <div class="chips">
         <div class="chip"><b>10 sec</b>&nbsp;per screen</div>
         <div class="chip"><b>Keyword</b>&nbsp;+ skill match</div>
@@ -275,7 +275,7 @@
         <div class="card-title">Screen a resume</div>
         <div class="score-tag">Free</div>
       </div>
-      <p class="card-desc">Upload a resume and paste the role's job description to get an instant match score.</p>
+      <p class="card-desc">Upload a resume and enter the role you're screening for to get an instant qualification check.</p>
 
       <label class="field-label" for="usernameInput">Your name</label>
       <input type="text" id="usernameInput" class="text-input" placeholder="e.g. Aisha Kumar" autocomplete="name">
@@ -294,9 +294,7 @@
       <div class="parse-status" id="parseStatus"></div>
       <input type="file" id="resumeInput" accept=".pdf,.docx,.txt">
 
-      <label class="field-label" for="jdInput">Job description</label>
-      <textarea id="jdInput" placeholder="Paste the job description here..."></textarea>
-      <div class="err" id="errMsg">Add a resume and a job description first.</div>
+      <div class="err" id="errMsg">Add your name, a resume, and a target role first.</div>
 
       <button class="submit-btn" id="screenBtn">Screen resume</button>
 
@@ -337,12 +335,12 @@
 
   <div class="about soft-in d3">
     <h2 class="about-title">About Resume Screener</h2>
-    <p>Resume Screener was invented by <b>Ajay</b>, who built it after watching hiring teams lose hours manually comparing resumes against job descriptions. The idea was simple: give recruiters and hopeful candidates alike a fast, honest read on how well a resume lines up with a role, without needing a spreadsheet or a third-party recruiter tool.</p>
-    <p>The website works by pulling the meaningful keywords out of a job description and checking how many of them show up in the uploaded resume. It then turns that overlap into a clear match score, a ring you can read at a glance, and two simple lists — what matched, and what's missing — so you know exactly where a resume stands and what to improve.</p>
+    <p>Resume Screener was invented by <b>Ajay</b>, who built it after watching hiring teams lose hours manually comparing resumes against job requirements. The idea was simple: give recruiters and hopeful candidates alike a fast, honest read on how well a resume lines up with a role, without needing a spreadsheet or a third-party recruiter tool.</p>
+    <p>The website works by matching the target role you enter against a set of typical requirements for that kind of position — core skills, tools, years of experience, and education level — and checking how many of them show up in the uploaded resume. It then turns that overlap into a clear match score and a plain-English list of what qualifies the candidate and what's missing.</p>
     <p>It's built to be lightweight and private: everything happens right in the browser, there's no account to create, and no resume data is stored anywhere. Whether you're a hiring manager screening a stack of applicants or a job seeker checking your own resume before you apply, Resume Screener is meant to give you that answer in seconds, not minutes.</p>
   </div>
 
-  <footer>Resume Screener · paste a job description and a text-based resume for the most accurate match score</footer>
+  <footer>Resume Screener · enter a target role and upload a text-based resume for the most accurate qualification check</footer>
 </div>
 <script>
   if (window['pdfjsLib']) {
@@ -354,7 +352,6 @@
   const dzContent = document.getElementById('dzContent');
   const usernameInput = document.getElementById('usernameInput');
   const roleInput = document.getElementById('roleInput');
-  const jdInput = document.getElementById('jdInput');
   const screenBtn = document.getElementById('screenBtn');
   const errMsg = document.getElementById('errMsg');
   const parseStatus = document.getElementById('parseStatus');
@@ -429,7 +426,51 @@
     return result.value || '';
   }
 
-  /* --- skill dictionary: common role-relevant skills to check for --- */
+  /* --- role profiles: what a role typically requires, since there's no job description to read --- */
+  const ROLE_PROFILES = [
+    { keys:['software engineer','software developer','developer','programmer'],
+      skills:['javascript','python','java','git','sql','testing','problem solving','rest api'],
+      minYears:2, educationLevel:"Bachelor's degree" },
+    { keys:['frontend developer','front-end developer','front end developer','ui developer'],
+      skills:['html','css','javascript','react','git','testing'],
+      minYears:1, educationLevel:null },
+    { keys:['backend developer','back-end developer','back end developer'],
+      skills:['python','java','node','sql','aws','docker','rest api'],
+      minYears:2, educationLevel:null },
+    { keys:['full stack developer','fullstack developer','full-stack developer'],
+      skills:['javascript','react','node','sql','git','rest api'],
+      minYears:2, educationLevel:null },
+    { keys:['devops engineer','site reliability','sre'],
+      skills:['docker','kubernetes','aws','ci/cd','linux','terraform','git'],
+      minYears:2, educationLevel:null },
+    { keys:['data scientist'],
+      skills:['python','machine learning','sql','data analysis','tensorflow','pytorch'],
+      minYears:2, educationLevel:"Master's degree" },
+    { keys:['data analyst'],
+      skills:['sql','excel','tableau','power bi','data analysis'],
+      minYears:1, educationLevel:"Bachelor's degree" },
+    { keys:['product manager'],
+      skills:['communication','leadership','project management','agile','teamwork'],
+      minYears:3, educationLevel:"Bachelor's degree" },
+    { keys:['project manager'],
+      skills:['project management','communication','leadership','agile','teamwork'],
+      minYears:2, educationLevel:null },
+    { keys:['ui designer','ux designer','ui/ux designer','product designer'],
+      skills:['communication','teamwork','problem solving'],
+      minYears:1, educationLevel:null },
+    { keys:['marketing manager','marketing executive'],
+      skills:['communication','leadership','project management','teamwork'],
+      minYears:2, educationLevel:"Bachelor's degree" },
+    { keys:['sales executive','sales manager','account executive'],
+      skills:['communication','teamwork','leadership'],
+      minYears:1, educationLevel:null },
+    { keys:['hr manager','human resources','recruiter'],
+      skills:['communication','teamwork','leadership','project management'],
+      minYears:2, educationLevel:"Bachelor's degree" },
+  ];
+
+  const GENERIC_SKILLS = ['communication','teamwork','problem solving','leadership'];
+
   const SKILL_BANK = [
     'javascript','typescript','python','java','c++','c#','go','golang','rust','ruby','php','swift','kotlin',
     'react','angular','vue','node','node.js','express','django','flask','spring','next.js',
@@ -440,31 +481,32 @@
     'communication','leadership','teamwork','problem solving','project management'
   ];
 
-  const STOPWORDS = new Set(['the','and','for','with','you','your','are','that','this','will','have','has','from','our','their','who','can','a','an','of','to','in','on','as','is','be','or','we','at','by','it']);
+  /* pick the best-matching role profile for whatever the person typed, or fall back gracefully */
+  function getRequirementsForRole(role){
+    const roleLower = role.toLowerCase();
 
-  function extractKeywords(text){
-    const words = text.toLowerCase().match(/[a-z][a-z+#.]{2,}/g) || [];
-    const freq = {};
-    words.forEach(w => { if(!STOPWORDS.has(w)) freq[w] = (freq[w]||0)+1; });
-    return Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,14);
-  }
+    let best = null, bestScore = 0;
+    ROLE_PROFILES.forEach(profile => {
+      profile.keys.forEach(key => {
+        if(roleLower.includes(key) && key.length > bestScore){
+          bestScore = key.length;
+          best = profile;
+        }
+      });
+    });
 
-  /* pull structured requirements (skills, years of experience, education) out of the JD */
-  function extractRequirements(jdText, role){
-    const lower = (role + ' ' + jdText).toLowerCase();
+    if(best){
+      return { skills: best.skills, minYears: best.minYears, educationLevel: best.educationLevel };
+    }
 
-    const skills = SKILL_BANK.filter(skill => lower.includes(skill));
-
-    let minYears = null;
-    const yearsMatch = jdText.match(/(\d+)\+?\s*(?:-\s*\d+\s*)?years?/i);
-    if(yearsMatch) minYears = parseInt(yearsMatch[1], 10);
-
-    let educationLevel = null;
-    if(/\bphd\b|doctorate/i.test(jdText)) educationLevel = 'PhD';
-    else if(/master'?s|\bmba\b|m\.s\./i.test(jdText)) educationLevel = "Master's degree";
-    else if(/bachelor'?s|\bb\.?s\.?\b|\bb\.?a\.?\b|undergraduate degree/i.test(jdText)) educationLevel = "Bachelor's degree";
-
-    return { skills, minYears, educationLevel };
+    // no known profile: pull any recognizable skill words directly out of the role text,
+    // otherwise fall back to generic professional skills so there's still something to check
+    const wordMatches = SKILL_BANK.filter(skill => roleLower.includes(skill));
+    return {
+      skills: wordMatches.length ? wordMatches : GENERIC_SKILLS,
+      minYears: null,
+      educationLevel: null
+    };
   }
 
   function analyzeResume(resumeLower, requirements){
@@ -506,12 +548,11 @@
   }
 
   screenBtn.addEventListener('click', () => {
-    const jd = jdInput.value.trim();
     const username = usernameInput.value.trim();
     const role = roleInput.value.trim();
 
-    if(!username || !resumeFileName || !jd){
-      errMsg.textContent = 'Add your name, a resume, and a job description first.';
+    if(!username || !resumeFileName || !role){
+      errMsg.textContent = 'Add your name, a resume, and a target role first.';
       errMsg.style.display = 'block';
       return;
     }
@@ -522,23 +563,9 @@
     }
     errMsg.style.display = 'none';
 
-    const jdKeywords = extractKeywords(jd);
     const resumeLower = resumeText.toLowerCase();
-    const requirements = extractRequirements(jd, role);
-
-    let analysis;
-    if(requirements.skills.length || requirements.minYears || requirements.educationLevel){
-      analysis = analyzeResume(resumeLower, requirements);
-    } else {
-      const matched = jdKeywords.filter(k => resumeLower.includes(k));
-      const missing = jdKeywords.filter(k => !resumeLower.includes(k));
-      const score = jdKeywords.length ? Math.round((matched.length/jdKeywords.length)*100) : 0;
-      analysis = {
-        points: matched.map(k=>({ok:true,text:'Resume mentions "'+k+'"'})).concat(missing.map(k=>({ok:false,text:'No mention of "'+k+'"'}))),
-        score, verdictLevel: score>=70?'pass':score>=40?'partial':'fail',
-        matchedSkills: matched, missingSkills: missing
-      };
-    }
+    const requirements = getRequirementsForRole(role);
+    const analysis = analyzeResume(resumeLower, requirements);
 
     const score = analysis.score;
     const circumference = 226;
