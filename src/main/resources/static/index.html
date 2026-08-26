@@ -10,19 +10,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <style>
     :root{
-      --bg-deep:#0A1F16;
-      --bg-panel:#0F2A1D;
-      --bg-panel-2:#123423;
+      --bg-deep:#000000;
+      --bg-panel:#0A0A0A;
+      --bg-panel-2:#131313;
       --line:rgba(255,255,255,0.10);
       --mint:#7FE8B8;
-      --mint-dim:#3F7A63;
+      --mint-dim:#5FCB9C;
       --amber:#F2A94E;
       --cream:#F6F3EA;
-      --card-bg:#E7F3EA;
-      --text-light:#EAF3EC;
-      --text-muted:#93AC9D;
-      --text-dark:#0F2418;
-      --text-dark-muted:#4B6155;
+      /* card now shares the pure-black palette instead of the old cream card */
+      --card-bg:#0A0A0A;
+      --card-line:rgba(255,255,255,0.12);
+      --card-line-strong:rgba(255,255,255,0.18);
+      --input-bg:#050505;
+      --text-light:#F2F2F0;
+      --text-muted:#8C8C89;
+      --text-dark:#F2F2F0;
+      --text-dark-muted:#8C8C89;
+      --placeholder:#565654;
+      --fail:#F2795A;
       --radius:14px;
     }
     *{box-sizing:border-box;}
@@ -30,8 +36,8 @@
     body{
       background:var(--bg-deep);
       background-image:
-        radial-gradient(circle at 15% 0%, rgba(127,232,184,0.08), transparent 45%),
-        radial-gradient(circle at 100% 20%, rgba(242,169,78,0.06), transparent 40%);
+        radial-gradient(circle at 15% 0%, rgba(127,232,184,0.06), transparent 45%),
+        radial-gradient(circle at 100% 20%, rgba(242,169,78,0.05), transparent 40%);
       color:var(--text-light);
       font-family:'Inter',sans-serif;
       line-height:1.5;
@@ -62,8 +68,8 @@
 
     nav{display:flex;align-items:center;justify-content:space-between;padding:8px 0 56px;}
     .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em;color:var(--text-light);}
-    .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center;color:var(--text-dark);font-size:15px;font-weight:700;}
-    .nav-cta{background:var(--mint);color:var(--text-dark);border:none;padding:11px 20px;border-radius:9px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;cursor:pointer;}
+    .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center;color:var(--bg-deep);font-size:15px;font-weight:700;}
+    .nav-cta{background:var(--mint);color:var(--bg-deep);border:none;padding:11px 20px;border-radius:9px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;cursor:pointer;}
 
     .eyebrow{
       margin-bottom:20px;
@@ -98,26 +104,27 @@
     /* --- form card --- */
     .card{
       background:var(--card-bg);
+      border:1px solid var(--card-line);
       border-radius:var(--radius);
       padding:28px;
       color:var(--text-dark);
-      box-shadow:0 24px 60px rgba(0,0,0,0.35);
+      box-shadow:0 24px 60px rgba(0,0,0,0.55);
       transition:transform .3s ease, box-shadow .3s ease;
     }
-    .card:hover{transform:translateY(-2px); box-shadow:0 28px 70px rgba(0,0,0,0.4);}
+    .card:hover{transform:translateY(-2px); box-shadow:0 28px 70px rgba(0,0,0,0.6);}
 
     input[type=text].text-input{
       width:100%;
-      border:1.5px solid #E3DECD;
+      border:1.5px solid var(--card-line-strong);
       border-radius:10px;
       padding:12px 14px;
       font-family:'Inter',sans-serif;
       font-size:13.5px;
       color:var(--text-dark);
-      background:#FBFAF6;
+      background:var(--input-bg);
       margin-bottom:20px;
     }
-    input[type=text].text-input::placeholder{color:#A6A08E;}
+    input[type=text].text-input::placeholder{color:var(--placeholder);}
     input[type=text].text-input:focus{outline:2px solid var(--mint-dim);outline-offset:1px;}
 
     .greeting{
@@ -126,10 +133,10 @@
       margin-bottom:16px;
       animation:softFade .5s ease both;
     }
-    .greeting b{color:var(--mint-dim);}
+    .greeting b{color:var(--mint);}
     .parse-status{font-size:12px;color:var(--text-dark-muted);margin:-14px 0 18px;min-height:14px;}
     .parse-status.busy{color:var(--mint-dim);}
-    .parse-status.err{color:#A6431F;}
+    .parse-status.err{color:var(--fail);}
 
     .verdict-banner{
       display:flex;align-items:center;gap:12px;
@@ -137,45 +144,45 @@
       margin-bottom:18px;font-family:'Space Grotesk',sans-serif;
       font-weight:700;font-size:15px;
     }
-    .verdict-banner.pass{background:rgba(63,122,99,0.14);color:var(--mint-dim);}
-    .verdict-banner.partial{background:rgba(180,132,42,0.14);color:#8A611F;}
-    .verdict-banner.fail{background:rgba(180,64,42,0.12);color:#A6431F;}
+    .verdict-banner.pass{background:rgba(127,232,184,0.14);color:var(--mint);}
+    .verdict-banner.partial{background:rgba(242,169,78,0.16);color:var(--amber);}
+    .verdict-banner.fail{background:rgba(242,121,90,0.14);color:var(--fail);}
     .verdict-dot{width:10px;height:10px;border-radius:50%;background:currentColor;flex:none;}
 
     .qual-points{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:9px;}
     .qual-points li{display:flex;gap:10px;font-size:13.5px;color:var(--text-dark);line-height:1.5;}
     .qual-points .mark{flex:none;font-weight:700;width:16px;}
-    .qual-points li.ok .mark{color:var(--mint-dim);}
-    .qual-points li.no .mark{color:#A6431F;}
+    .qual-points li.ok .mark{color:var(--mint);}
+    .qual-points li.no .mark{color:var(--fail);}
     .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
     .card-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;color:var(--text-dark);}
-    .score-tag{font-size:12px;font-weight:600;color:var(--mint-dim);background:rgba(63,122,99,0.12);padding:5px 10px;border-radius:7px;}
+    .score-tag{font-size:12px;font-weight:600;color:var(--mint);background:rgba(127,232,184,0.14);padding:5px 10px;border-radius:7px;}
     .card-desc{font-size:13.5px;color:var(--text-dark-muted);margin:6px 0 22px;}
 
     label.field-label{display:block;font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:8px;}
 
     .dropzone{
-      border:1.5px dashed #C9C3B2;
+      border:1.5px dashed var(--card-line-strong);
       border-radius:10px;
       padding:22px 16px;
       text-align:center;
       cursor:pointer;
-      background:#FBFAF6;
+      background:var(--input-bg);
       transition:border-color .15s, background .15s;
       margin-bottom:20px;
     }
-    .dropzone:hover, .dropzone.drag{border-color:var(--mint-dim);background:#F1F8F3;}
-    .up-icon{width:30px;height:26px;margin:0 auto 10px;border:1.6px solid #B7B09B;border-radius:5px;position:relative;}
-    .up-icon::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;border-left:1.6px solid #B7B09B;border-top:1.6px solid #B7B09B;transform:translate(-50%,-40%) rotate(45deg);}
+    .dropzone:hover, .dropzone.drag{border-color:var(--mint-dim);background:var(--bg-panel-2);}
+    .up-icon{width:30px;height:26px;margin:0 auto 10px;border:1.6px solid var(--placeholder);border-radius:5px;position:relative;}
+    .up-icon::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;border-left:1.6px solid var(--placeholder);border-top:1.6px solid var(--placeholder);transform:translate(-50%,-40%) rotate(45deg);}
     .dz-filedot{width:8px;height:8px;border-radius:50%;background:var(--mint-dim);display:inline-block;margin-right:6px;}
     .dropzone .main{font-size:13.5px;color:var(--text-dark);font-weight:500;}
     .dropzone .hint{font-size:12px;color:var(--text-dark-muted);margin-top:3px;}
-    .dropzone .filename{font-size:13px;color:var(--mint-dim);font-weight:600;}
+    .dropzone .filename{font-size:13px;color:var(--mint);font-weight:600;}
     input[type=file]{display:none;}
 
     textarea{
       width:100%;
-      border:1.5px solid #E3DECD;
+      border:1.5px solid var(--card-line-strong);
       border-radius:10px;
       padding:12px 14px;
       font-family:'Inter',sans-serif;
@@ -184,15 +191,15 @@
       resize:vertical;
       min-height:110px;
       margin-bottom:22px;
-      background:#FBFAF6;
+      background:var(--input-bg);
     }
     textarea:focus, .dropzone:focus-visible{outline:2px solid var(--mint-dim);outline-offset:1px;}
-    textarea::placeholder{color:#A6A08E;}
+    textarea::placeholder{color:var(--placeholder);}
 
     .submit-btn{
       width:100%;
-      background:var(--text-dark);
-      color:var(--cream);
+      background:var(--mint);
+      color:var(--bg-deep);
       border:none;
       padding:14px;
       border-radius:10px;
@@ -202,11 +209,11 @@
       cursor:pointer;
       transition:background .15s;
     }
-    .submit-btn:hover{background:#1B3A2A;}
-    .err{color:#B4402A;font-size:12.5px;margin:-12px 0 16px;display:none;}
+    .submit-btn:hover{background:#93EEC5;}
+    .err{color:var(--fail);font-size:12.5px;margin:-12px 0 16px;display:none;}
 
     /* --- results --- */
-    .results{margin-top:22px;padding-top:20px;border-top:1px solid #E3DECD;display:none;}
+    .results{margin-top:22px;padding-top:20px;border-top:1px solid var(--card-line-strong);display:none;}
     .results.show{display:block;}
     .score-row{display:flex;align-items:center;gap:18px;margin-bottom:18px;}
     .ring-wrap{position:relative;width:84px;height:84px;flex:none;}
@@ -219,8 +226,8 @@
     .kw-title{font-size:12px;font-weight:600;color:var(--text-dark-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;}
     .kw-list{display:flex;flex-wrap:wrap;gap:6px;}
     .kw{font-size:12.5px;padding:4px 10px;border-radius:7px;font-weight:500;}
-    .kw.match{background:rgba(63,122,99,0.12);color:var(--mint-dim);}
-    .kw.miss{background:rgba(180,64,42,0.10);color:#A6431F;}
+    .kw.match{background:rgba(127,232,184,0.14);color:var(--mint);}
+    .kw.miss{background:rgba(242,121,90,0.14);color:var(--fail);}
 
     footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:12.5px;color:var(--text-muted);text-align:center;}
 
@@ -304,8 +311,8 @@
         <div class="score-row">
           <div class="ring-wrap">
             <svg width="84" height="84" viewBox="0 0 84 84">
-              <circle cx="42" cy="42" r="36" fill="none" stroke="#E3DECD" stroke-width="8"/>
-              <circle id="scoreRing" cx="42" cy="42" r="36" fill="none" stroke="#3F7A63" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="226"/>
+              <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8"/>
+              <circle id="scoreRing" cx="42" cy="42" r="36" fill="none" stroke="#5FCB9C" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="226"/>
             </svg>
             <div class="ring-num" id="scoreNum">0%</div>
           </div>
@@ -567,7 +574,7 @@
     const score = analysis.score;
     const circumference = 226;
     const offset = circumference - (circumference * score / 100);
-    scoreRing.style.stroke = score >= 70 ? '#3F7A63' : score >= 40 ? '#B4842A' : '#A6431F';
+    scoreRing.style.stroke = score >= 70 ? '#5FCB9C' : score >= 40 ? '#F2A94E' : '#F2795A';
     scoreRing.setAttribute('stroke-dashoffset', offset);
     scoreNum.textContent = score + '%';
     verdict.textContent = score >= 70 ? 'Strong match' : score >= 40 ? 'Partial match' : 'Weak match';
