@@ -3,695 +3,641 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resume Screener — Screen every candidate in seconds</title>
+  <title>Resume Screener</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <style>
-    :root{
-      --bg-deep:#000000;
-      --bg-panel:#0A0A0A;
-      --bg-panel-2:#131313;
-      --line:rgba(255,255,255,0.10);
-      --mint:#7FE8B8;
-      --mint-dim:#5FCB9C;
-      --amber:#F2A94E;
-      --cream:#F6F3EA;
-      /* card now shares the pure-black palette instead of the old cream card */
-      --card-bg:#0A0A0A;
-      --card-line:rgba(255,255,255,0.12);
-      --card-line-strong:rgba(255,255,255,0.18);
-      --input-bg:#050505;
-      --text-light:#F2F2F0;
-      --text-muted:#8C8C89;
-      --text-dark:#F2F2F0;
-      --text-dark-muted:#8C8C89;
-      --placeholder:#565654;
-      --fail:#F2795A;
-      --radius:14px;
-    }
-    *{box-sizing:border-box;}
-    html,body{margin:0;padding:0;}
-    body{
-      background:var(--bg-deep);
-      background-image:
-        radial-gradient(circle at 15% 0%, rgba(127,232,184,0.06), transparent 45%),
-        radial-gradient(circle at 100% 20%, rgba(242,169,78,0.05), transparent 40%);
-      color:var(--text-light);
-      font-family:'Inter',sans-serif;
-      line-height:1.5;
-    }
-    .wrap{max-width:1120px;margin:0 auto;padding:32px 24px 80px;position:relative;z-index:1;}
-
-    #bgCanvas{
-      position:fixed;
-      top:0;left:0;
-      width:100vw;height:100vh;
-      z-index:0;
-      pointer-events:none;
-    }
-
-    @keyframes softRise{
-      from{opacity:0; transform:translateY(14px);}
-      to{opacity:1; transform:translateY(0);}
-    }
-    .soft-in{animation:softRise .7s cubic-bezier(.22,.61,.36,1) both;}
-    .soft-in.d1{animation-delay:.05s;}
-    .soft-in.d2{animation-delay:.15s;}
-    .soft-in.d3{animation-delay:.25s;}
-    .soft-in.d4{animation-delay:.35s;}
-    @keyframes softFade{
-      from{opacity:0; transform:translateY(6px);}
-      to{opacity:1; transform:translateY(0);}
-    }
-
-    nav{display:flex;align-items:center;justify-content:space-between;padding:8px 0 56px;}
-    .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em;color:var(--text-light);}
-    .logo .mark{width:28px;height:28px;border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center;color:var(--bg-deep);font-size:15px;font-weight:700;}
-    .nav-cta{background:var(--mint);color:var(--bg-deep);border:none;padding:11px 20px;border-radius:9px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;cursor:pointer;}
-
-    .eyebrow{
-      margin-bottom:20px;
-    }
-    .eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber);}
-
-    h1{
-      font-family:'Space Grotesk',sans-serif;
-      font-weight:700;
-      font-size:52px;
-      line-height:1.05;
-      letter-spacing:-0.02em;
-      margin:0 0 20px;
-      color:var(--text-light);
-      max-width:560px;
-    }
-    h1 .accent{color:var(--mint);}
-    .sub{font-size:17px;color:var(--text-muted);max-width:460px;margin:0 0 32px;}
-
-    .chips{display:flex;flex-wrap:wrap;gap:10px;}
-    .chip{
-      display:flex;align-items:center;gap:8px;
-      background:var(--bg-panel-2);border:1px solid var(--line);
-      padding:10px 16px;border-radius:10px;font-size:13.5px;color:var(--text-muted);
-    }
-    .chip b{color:var(--text-light);font-weight:600;}
-
-    .hero-grid{display:grid;grid-template-columns:1fr 460px;gap:56px;align-items:center;margin-top:24px;}
-    @media (max-width:880px){.hero-grid{grid-template-columns:1fr;} h1{font-size:38px;}}
-    .hero-copy{padding-top:6px;}
-
-    /* --- form card --- */
-    .card{
-      background:var(--card-bg);
-      border:1px solid var(--card-line);
-      border-radius:var(--radius);
-      padding:28px;
-      color:var(--text-dark);
-      box-shadow:0 24px 60px rgba(0,0,0,0.55);
-      transition:transform .3s ease, box-shadow .3s ease;
-    }
-    .card:hover{transform:translateY(-2px); box-shadow:0 28px 70px rgba(0,0,0,0.6);}
-
-    input[type=text].text-input{
-      width:100%;
-      border:1.5px solid var(--card-line-strong);
-      border-radius:10px;
-      padding:12px 14px;
-      font-family:'Inter',sans-serif;
-      font-size:13.5px;
-      color:var(--text-dark);
-      background:var(--input-bg);
-      margin-bottom:20px;
-    }
-    input[type=text].text-input::placeholder{color:var(--placeholder);}
-    input[type=text].text-input:focus{outline:2px solid var(--mint-dim);outline-offset:1px;}
-
-    .greeting{
-      font-size:14px;
-      color:var(--text-dark-muted);
-      margin-bottom:16px;
-      animation:softFade .5s ease both;
-    }
-    .greeting b{color:var(--mint);}
-    .parse-status{font-size:12px;color:var(--text-dark-muted);margin:-14px 0 18px;min-height:14px;}
-    .parse-status.busy{color:var(--mint-dim);}
-    .parse-status.err{color:var(--fail);}
-
-    .verdict-banner{
-      display:flex;align-items:center;gap:12px;
-      padding:14px 16px;border-radius:10px;
-      margin-bottom:18px;font-family:'Space Grotesk',sans-serif;
-      font-weight:700;font-size:15px;
-    }
-    .verdict-banner.pass{background:rgba(127,232,184,0.14);color:var(--mint);}
-    .verdict-banner.partial{background:rgba(242,169,78,0.16);color:var(--amber);}
-    .verdict-banner.fail{background:rgba(242,121,90,0.14);color:var(--fail);}
-    .verdict-dot{width:10px;height:10px;border-radius:50%;background:currentColor;flex:none;}
-
-    .qual-points{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:9px;}
-    .qual-points li{display:flex;gap:10px;font-size:13.5px;color:var(--text-dark);line-height:1.5;}
-    .qual-points .mark{flex:none;font-weight:700;width:16px;}
-    .qual-points li.ok .mark{color:var(--mint);}
-    .qual-points li.no .mark{color:var(--fail);}
-    .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-    .card-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;color:var(--text-dark);}
-    .score-tag{font-size:12px;font-weight:600;color:var(--mint);background:rgba(127,232,184,0.14);padding:5px 10px;border-radius:7px;}
-    .card-desc{font-size:13.5px;color:var(--text-dark-muted);margin:6px 0 22px;}
-
-    label.field-label{display:block;font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:8px;}
-
-    .dropzone{
-      border:1.5px dashed var(--card-line-strong);
-      border-radius:10px;
-      padding:22px 16px;
-      text-align:center;
-      cursor:pointer;
-      background:var(--input-bg);
-      transition:border-color .15s, background .15s;
-      margin-bottom:20px;
-    }
-    .dropzone:hover, .dropzone.drag{border-color:var(--mint-dim);background:var(--bg-panel-2);}
-    .up-icon{width:30px;height:26px;margin:0 auto 10px;border:1.6px solid var(--placeholder);border-radius:5px;position:relative;}
-    .up-icon::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;border-left:1.6px solid var(--placeholder);border-top:1.6px solid var(--placeholder);transform:translate(-50%,-40%) rotate(45deg);}
-    .dz-filedot{width:8px;height:8px;border-radius:50%;background:var(--mint-dim);display:inline-block;margin-right:6px;}
-    .dropzone .main{font-size:13.5px;color:var(--text-dark);font-weight:500;}
-    .dropzone .hint{font-size:12px;color:var(--text-dark-muted);margin-top:3px;}
-    .dropzone .filename{font-size:13px;color:var(--mint);font-weight:600;}
+    :root{--bg:#050a0f;--bg2:#0a1520;--mint:#00f5d4;--cyan:#00bbf9;--purple:#9b5de5;--pink:#f15bb5;--yellow:#fee440;--white:#eaf3ec;--muted:#6b7f8e;--glow1:rgba(0,245,212,0.15);--glow2:rgba(0,187,249,0.15);}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;overflow-x:hidden;}
+    body{background:var(--bg);color:var(--white);font-family:Inter,sans-serif;overflow-x:hidden;}
+    canvas#particles{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;}
+    .cursor-orb{position:fixed;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(0,245,212,0.04),transparent 70%);pointer-events:none;z-index:0;transform:translate(-50%,-50%);transition:left .1s,top .1s;}
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:20px 48px;background:rgba(5,10,15,0.6);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.04);transition:all .3s;}
+    nav.scrolled{padding:14px 48px;background:rgba(5,10,15,0.9);}
+    .logo{display:flex;align-items:center;gap:10px;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:20px;color:var(--white);text-decoration:none;}
+    .logo-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--mint),var(--cyan));display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:700;font-size:14px;transition:transform .3s;}
+    .logo:hover .logo-mark{transform:rotate(12deg) scale(1.1);}
+    .nav-links{display:flex;align-items:center;gap:32px;}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;position:relative;}
+    .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--mint);transition:width .3s;}
+    .nav-links a:hover{color:var(--white);}
+    .nav-links a:hover::after{width:100%;}
+    .nav-cta{background:linear-gradient(135deg,var(--mint),var(--cyan));color:var(--bg);padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none;transition:all .3s;border:none;cursor:pointer;}
+    .nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,245,212,0.3);}
+    /* HERO */
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:120px 48px 80px;}
+    .hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 40%,rgba(0,245,212,0.08),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(155,93,229,0.06),transparent 50%);pointer-events:none;}
+    .hero-content{position:relative;z-index:2;text-align:center;max-width:700px;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.15);padding:6px 16px;border-radius:100px;font-size:12px;color:var(--mint);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:24px;animation:floatBadge 3s ease-in-out infinite;}
+    .hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:pulse 2s infinite;}
+    @keyframes floatBadge{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
+    @keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(0,245,212,0.3);}50%{box-shadow:0 0 60px rgba(0,245,212,0.6);}}
+    h1{font-family:Space Grotesk,sans-serif;font-weight:700;font-size:72px;line-height:1.0;letter-spacing:-0.04em;margin:0 0 24px;}
+    h1 .gradient{background:linear-gradient(135deg,var(--mint),var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero-sub{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto 40px;line-height:1.7;}
+    .hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+    .btn-glow{background:linear-gradient(135deg,var(--mint),var(--cyan));color:var(--bg);padding:16px 36px;border-radius:12px;font-family:Inter,sans-serif;font-weight:600;font-size:16px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all .3s;position:relative;overflow:hidden;}
+    .btn-glow::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);opacity:0;transition:opacity .3s;}
+    .btn-glow:hover{transform:translateY(-3px);animation:glowPulse 2s infinite;}
+    .btn-glow:hover::before{opacity:1;}
+    .btn-outline{background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,0.12);padding:16px 36px;border-radius:12px;font-family:Inter,sans-serif;font-weight:600;font-size:16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all .3s;}
+    .btn-outline:hover{border-color:var(--mint);color:var(--mint);transform:translateY(-3px);}
+    /* HOLOGRAM SECTION */
+    .hologram-section{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .hologram-container{position:relative;width:100%;max-width:900px;display:flex;align-items:center;justify-content:center;}
+    .hologram-video{width:600px;height:600px;object-fit:contain;position:relative;z-index:2;filter:drop-shadow(0 0 60px rgba(0,245,212,0.3)) drop-shadow(0 0 120px rgba(0,187,249,0.15));transition:transform .3s;}
+    .hologram-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,245,212,0.12),rgba(0,187,249,0.06),transparent 70%);filter:blur(40px);z-index:1;animation:hologramGlow 4s ease-in-out infinite;}
+    @keyframes hologramGlow{0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.15);opacity:1;}}
+    /* FLOATING CARDS */
+    .float-card{position:absolute;background:rgba(10,21,32,0.7);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px 20px;backdrop-filter:blur(20px);z-index:3;transition:all .5s cubic-bezier(.22,.61,.36,1);pointer-events:auto;cursor:default;}
+    .float-card:hover{border-color:rgba(0,245,212,0.3);box-shadow:0 8px 40px rgba(0,245,212,0.1);transform:translateY(-4px) scale(1.02) !important;}
+    .fc1{top:15%;left:-5%;animation:float1 6s ease-in-out infinite;}
+    .fc2{top:20%;right:-5%;animation:float2 7s ease-in-out infinite .5s;}
+    .fc3{bottom:20%;left:-2%;animation:float1 8s ease-in-out infinite 1s;}
+    .fc4{bottom:15%;right:-3%;animation:float2 6.5s ease-in-out infinite .3s;}
+    .fc5{top:50%;left:-8%;animation:float1 7.5s ease-in-out infinite .8s;}
+    .fc6{top:45%;right:-8%;animation:float2 7s ease-in-out infinite 1.2s;}
+    @keyframes float1{0%,100%{transform:translateY(0) translateX(0);}50%{transform:translateY(-14px) translateX(6px);}}
+    @keyframes float2{0%,100%{transform:translateY(0) translateX(0);}50%{transform:translateY(-10px) translateX(-8px);}}
+    .fc-icon{font-size:20px;margin-bottom:6px;}
+    .fc-title{font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;color:var(--white);margin-bottom:2px;}
+    .fc-value{font-size:12px;color:var(--muted);}
+    .fc-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:6px;background:rgba(0,245,212,0.1);color:var(--mint);font-weight:600;margin-top:4px;}
+    .fc-tag.warn{background:rgba(254,228,64,0.1);color:var(--yellow);}
+    .fc-tag.pink{background:rgba(241,91,181,0.1);color:var(--pink);}
+    /* SECTIONS */
+    .section{padding:120px 48px;position:relative;z-index:1;}
+    .section-center{text-align:center;max-width:680px;margin:0 auto;}
+    .tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--mint);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:16px;}
+    .tag::before{content:'';width:20px;height:2px;background:var(--mint);border-radius:1px;}
+    .sec-title{font-family:Space Grotesk,sans-serif;font-weight:700;font-size:48px;line-height:1.08;letter-spacing:-0.03em;margin:0 0 16px;}
+    .sec-title .gr{background:linear-gradient(135deg,var(--mint),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sec-desc{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 56px;line-height:1.7;}
+    /* FEATURES GRID */
+    .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto;}
+    .feat-card{background:rgba(10,21,32,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px;transition:all .4s cubic-bezier(.22,.61,.36,1);position:relative;overflow:hidden;}
+    .feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--mint),var(--cyan),var(--purple));transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+    .feat-card:hover{transform:translateY(-8px);border-color:rgba(0,245,212,0.2);box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+    .feat-card:hover::before{transform:scaleX(1);}
+    .feat-icon{width:48px;height:48px;border-radius:12px;background:rgba(0,245,212,0.08);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;transition:all .3s;}
+    .feat-card:hover .feat-icon{background:rgba(0,245,212,0.15);transform:scale(1.1);}
+    .feat-card h3{font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:700;margin:0 0 6px;}
+    .feat-card p{font-size:13.5px;color:var(--muted);line-height:1.7;margin:0;}
+    /* STEPS */
+    .steps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;max-width:900px;margin:60px auto 0;position:relative;}
+    .steps-row::before{content:'';position:absolute;top:36px;left:120px;right:120px;height:2px;background:linear-gradient(90deg,var(--mint),var(--purple),var(--pink));opacity:.2;}
+    .step{text-align:center;position:relative;}
+    .step-dot{width:72px;height:72px;border-radius:50%;background:rgba(0,245,212,0.06);border:2px solid rgba(0,245,212,0.2);display:flex;align-items:center;justify-content:center;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:26px;color:var(--mint);margin:0 auto 20px;transition:all .3s;position:relative;z-index:1;}
+    .step:hover .step-dot{background:rgba(0,245,212,0.12);transform:scale(1.12);box-shadow:0 0 40px rgba(0,245,212,0.2);}
+    .step h3{font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:700;margin:0 0 6px;}
+    .step p{font-size:13.5px;color:var(--muted);line-height:1.7;max-width:260px;margin:0 auto;}
+    /* SCREENER */
+    .screener-section{display:grid;grid-template-columns:1fr 460px;gap:60px;align-items:start;max-width:1100px;margin:0 auto;}
+    .scr-info{padding-top:20px;}
+    .scr-list{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:14px;}
+    .scr-list li{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--muted);}
+    .scr-check{width:28px;height:28px;border-radius:8px;background:rgba(0,245,212,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;flex:none;color:var(--mint);}
+    .card{background:rgba(10,21,32,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:28px;backdrop-filter:blur(20px);transition:all .3s;}
+    .card:hover{border-color:rgba(0,245,212,0.15);box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+    input[type=text].inp{width:100%;border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 14px;font-family:Inter,sans-serif;font-size:13.5px;color:var(--white);background:rgba(255,255,255,0.04);margin-bottom:18px;transition:border-color .2s;}
+    input[type=text].inp::placeholder{color:rgba(255,255,255,0.25);}
+    input[type=text].inp:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 3px rgba(0,245,212,0.08);}
+    .lbl{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;}
+    .dropzone{border:1.5px dashed rgba(255,255,255,0.1);border-radius:10px;padding:20px 16px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);transition:all .3s;margin-bottom:18px;position:relative;}
+    .dropzone:hover,.dropzone.drag{border-color:var(--mint);background:rgba(0,245,212,0.03);}
+    .dz-icon{font-size:24px;margin-bottom:6px;}
+    .dz-main{font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;}
+    .dz-hint{font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;}
+    .dz-file{font-size:12px;color:var(--mint);font-weight:600;}
+    .dz-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
     input[type=file]{display:none;}
-
-    textarea{
-      width:100%;
-      border:1.5px solid var(--card-line-strong);
-      border-radius:10px;
-      padding:12px 14px;
-      font-family:'Inter',sans-serif;
-      font-size:13.5px;
-      color:var(--text-dark);
-      resize:vertical;
-      min-height:110px;
-      margin-bottom:22px;
-      background:var(--input-bg);
-    }
-    textarea:focus, .dropzone:focus-visible{outline:2px solid var(--mint-dim);outline-offset:1px;}
-    textarea::placeholder{color:var(--placeholder);}
-
-    .submit-btn{
-      width:100%;
-      background:var(--mint);
-      color:var(--bg-deep);
-      border:none;
-      padding:14px;
-      border-radius:10px;
-      font-family:'Inter',sans-serif;
-      font-weight:600;
-      font-size:14.5px;
-      cursor:pointer;
-      transition:background .15s;
-    }
-    .submit-btn:hover{background:#93EEC5;}
-    .err{color:var(--fail);font-size:12.5px;margin:-12px 0 16px;display:none;}
-
-    /* --- results --- */
-    .results{margin-top:22px;padding-top:20px;border-top:1px solid var(--card-line-strong);display:none;}
-    .results.show{display:block;}
-    .score-row{display:flex;align-items:center;gap:18px;margin-bottom:18px;}
-    .ring-wrap{position:relative;width:84px;height:84px;flex:none;}
+    .parse-st{font-size:11px;color:var(--muted);margin:-12px 0 14px;min-height:14px;}
+    .parse-st.busy{color:var(--cyan);}.parse-st.err{color:var(--pink);}
+    .err-msg{color:var(--pink);font-size:12px;margin:-10px 0 14px;display:none;}
+    .submit-btn{width:100%;background:linear-gradient(135deg,var(--mint),var(--cyan));color:var(--bg);border:none;padding:14px;border-radius:10px;font-family:Inter,sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+    .submit-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),transparent);opacity:0;transition:opacity .3s;}
+    .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,245,212,0.3);}
+    .submit-btn:hover::before{opacity:1;}
+    /* RESULTS */
+    .results{margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.06);display:none;}
+    .results.show{display:block;animation:fadeUp .5s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    .greeting{font-size:13px;color:var(--muted);margin-bottom:14px;}
+    .greeting b{color:var(--mint);}
+    .verdict-bar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:14px;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:14px;transition:all .3s;}
+    .verdict-bar.pass{background:rgba(0,245,212,0.08);color:var(--mint);}
+    .verdict-bar.partial{background:rgba(254,228,64,0.08);color:var(--yellow);}
+    .verdict-bar.fail{background:rgba(241,91,181,0.08);color:var(--pink);}
+    .v-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none;animation:pulse 2s infinite;}
+    .score-row{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+    .ring-wrap{position:relative;width:72px;height:72px;flex:none;}
     .ring-wrap svg{transform:rotate(-90deg);}
-    .ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;color:var(--text-dark);}
-    .score-label{font-size:13px;color:var(--text-dark-muted);}
-    .score-verdict{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;color:var(--text-dark);margin-top:2px;}
-
-    .kw-block{margin-bottom:14px;}
-    .kw-title{font-size:12px;font-weight:600;color:var(--text-dark-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;}
-    .kw-list{display:flex;flex-wrap:wrap;gap:6px;}
-    .kw{font-size:12.5px;padding:4px 10px;border-radius:7px;font-weight:500;}
-    .kw.match{background:rgba(127,232,184,0.14);color:var(--mint);}
-    .kw.miss{background:rgba(242,121,90,0.14);color:var(--fail);}
-
-    footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:12.5px;color:var(--text-muted);text-align:center;}
-
-    .about{
-      margin-top:88px;
-      padding-top:48px;
-      border-top:1px solid var(--line);
-    }
-    .about-title{
-      font-family:'Space Grotesk',sans-serif;
-      font-weight:700;
-      font-size:26px;
-      color:var(--text-light);
-      margin:0 0 20px;
-      letter-spacing:-0.01em;
-    }
-    .about p{
-      font-size:15px;
-      line-height:1.75;
-      color:var(--text-muted);
-      margin:0 0 16px;
-    }
-    .about p b{color:var(--mint);font-weight:600;}
+    .ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:18px;color:var(--white);}
+    .score-lbl{font-size:12px;color:var(--muted);}
+    .score-v{font-family:Space Grotesk,sans-serif;font-weight:600;font-size:15px;color:var(--white);margin-top:2px;}
+    .kw-block{margin-bottom:12px;}
+    .kw-title{font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+    .kw-list{display:flex;flex-wrap:wrap;gap:5px;}
+    .kw{font-size:11.5px;padding:3px 9px;border-radius:6px;font-weight:500;transition:all .2s;cursor:default;}
+    .kw.match{background:rgba(0,245,212,0.1);color:var(--mint);}
+    .kw.miss{background:rgba(241,91,181,0.08);color:var(--pink);}
+    .kw:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+    .qual-points{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:7px;}
+    .qual-points li{display:flex;gap:8px;font-size:12.5px;color:rgba(255,255,255,0.7);line-height:1.4;transition:transform .2s;}
+    .qual-points li:hover{transform:translateX(3px);}
+    .qual-points .mk{flex:none;font-weight:700;width:14px;font-size:12px;}
+    .qual-points li.ok .mk{color:var(--mint);}.qual-points li.no .mk{color:var(--pink);}
+    /* FOOTER */
+    footer{padding:40px 48px;border-top:1px solid rgba(255,255,255,0.04);text-align:center;font-size:12px;color:rgba(255,255,255,0.25);position:relative;z-index:1;}
+    /* SCROLL REVEAL */
+    .rv{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.22,.61,.36,1);}
+    .rv.v{opacity:1;transform:translateY(0);}
+    .rv-l{opacity:0;transform:translateX(-50px);transition:all .8s cubic-bezier(.22,.61,.36,1);}
+    .rv-l.v{opacity:1;transform:translateX(0);}
+    .rv-r{opacity:0;transform:translateX(50px);transition:all .8s cubic-bezier(.22,.61,.36,1);}
+    .rv-r.v{opacity:1;transform:translateX(0);}
+    .rv-s{opacity:0;transform:scale(.88);transition:all .8s cubic-bezier(.22,.61,.36,1);}
+    .rv-s.v{opacity:1;transform:scale(1);}
+    @media(max-width:880px){.feat-grid,.steps-row{grid-template-columns:1fr;}.screener-section{grid-template-columns:1fr;}.hero{padding:100px 24px 60px;}h1{font-size:42px;}.float-card{display:none;}.hologram-video{width:350px;height:350px;}.section{padding:80px 24px;}}
   </style>
 </head>
 <body>
-<canvas id="bgCanvas"></canvas>
+<canvas id="particles"></canvas>
+<div class="cursor-orb" id="cursorOrb"></div>
 <div class="wrap">
-
-  <nav>
-    <div class="logo"><span class="mark">R</span>Resumescreener</div>
-
+  <nav id="mainNav">
+    <a href="#" class="logo"><span class="logo-mark">R</span>ResumeScreener</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it Works</a>
+      <a href="#screener">Try it</a>
+      <a href="#screener" class="nav-cta">Screen Now</a>
+    </div>
   </nav>
-
-  <div class="hero-grid">
-    <div class="hero-copy soft-in d1">
-      <div class="eyebrow">Built for hiring teams</div>
-      <h1>Screen every resume <span class="accent">before your coffee gets cold</span></h1>
-      <p class="sub">Drop in a resume and the role you're hiring for — get a match score, matched skills, and gaps in seconds. No spreadsheets, no guesswork.</p>
-      <div class="chips">
-        <div class="chip"><b>10 sec</b>&nbsp;per screen</div>
-        <div class="chip"><b>Keyword</b>&nbsp;+ skill match</div>
-        <div class="chip"><b>Zero</b>&nbsp;setup</div>
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge rv"><span class="pulse"></span>AI-Powered Resume Screening</div>
+      <h1 class="rv">Screen every resume<br><span class="gradient">before your coffee gets cold</span></h1>
+      <p class="hero-sub rv">Drop in a resume and the role you are hiring for. Get a match score, matched skills, and gaps in seconds.</p>
+      <div class="hero-btns rv">
+        <a href="#screener" class="btn-glow">Start Screening</a>
+        <a href="#how" class="btn-outline">See How it Works</a>
       </div>
     </div>
-
-    <div class="card soft-in d2">
-      <div class="card-head">
-        <div class="card-title">Screen a resume</div>
-        <div class="score-tag">Free</div>
+  </section>
+  <section class="hologram-section" id="hologram">
+    <div class="hologram-container">
+      <div class="hologram-glow"></div>
+      <video class="hologram-video rv-s" autoplay muted loop playsinline id="hologramVideo"><source src="holographic-hand.mp4" type="video/mp4"></video>
+      <div class="float-card fc1 rv-s"><div class="fc-icon">📊</div><div class="fc-title">Match Score</div><div class="fc-value">87% Strong</div><div class="fc-tag">Qualified</div></div>
+      <div class="float-card fc2 rv-s"><div class="fc-icon">🔍</div><div class="fc-title">Skills Found</div><div class="fc-value">12 of 15 matched</div><div class="fc-tag">Excellent</div></div>
+      <div class="float-card fc3 rv-s"><div class="fc-icon">⚡</div><div class="fc-title">Screen Time</div><div class="fc-value">0.8 seconds</div><div class="fc-tag">Lightning</div></div>
+      <div class="float-card fc4 rv-s"><div class="fc-icon">🎯</div><div class="fc-title">Experience</div><div class="fc-value">4+ years</div><div class="fc-tag warn">Meets Req</div></div>
+      <div class="float-card fc5 rv-s"><div class="fc-icon">📝</div><div class="fc-title">Education</div><div class="fc-value">Bachelor's CS</div><div class="fc-tag">Verified</div></div>
+      <div class="float-card fc6 rv-s"><div class="fc-icon">🔒</div><div class="fc-title">Privacy</div><div class="fc-value">100% Local</div><div class="fc-tag pink">No Data Sent</div></div>
+    </div>
+  </section>
+  <section class="section" id="features">
+    <div class="section-center">
+      <div class="tag rv">Why Resume Screener</div>
+      <h2 class="sec-title rv">Everything you need to screen<br>resumes <span class="gr">in seconds</span></h2>
+      <p class="sec-desc rv">Built for hiring teams who value speed and accuracy. No accounts, no setup.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card rv"><div class="feat-icon">⚡</div><h3>10-Second Screening</h3><p>Get instant match scores by comparing resumes against role-specific requirements.</p></div>
+      <div class="feat-card rv"><div class="feat-icon">🔍</div><h3>Smart Keyword Match</h3><p>Matches skills, tools, years of experience, and education level against each role.</p></div>
+      <div class="feat-card rv"><div class="feat-icon">📦</div><h3>Multi-Format Support</h3><p>Upload PDF, DOCX, or TXT files. Everything happens in the browser.</p></div>
+      <div class="feat-card rv"><div class="feat-icon">📊</div><h3>Clear Match Score</h3><p>Visual score ring with pass/partial/fail verdict plus detailed breakdown.</p></div>
+      <div class="feat-card rv"><div class="feat-icon">🔒</div><h3>100% Private</h3><p>No accounts, no data storage. Everything runs locally in your browser.</p></div>
+      <div class="feat-card rv"><div class="feat-icon">🎯</div><h3>Zero Setup</h3><p>No software to install. Just open the page and start screening resumes.</p></div>
+    </div>
+  </section>
+  <section class="section" id="how">
+    <div class="section-center">
+      <div class="tag rv">How it Works</div>
+      <h2 class="sec-title rv">Three steps to a<br><span class="gr">perfect screen</span></h2>
+      <p class="sec-desc rv">No training required. If you can upload a file, you can screen a resume.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step rv"><div class="step-dot">1</div><h3>Enter the Role</h3><p>Type the job title you are hiring for. The tool knows what skills each role needs.</p></div>
+      <div class="step rv"><div class="step-dot">2</div><h3>Upload Resume</h3><p>Drag and drop or click to upload a PDF, DOCX, or TXT resume file.</p></div>
+      <div class="step rv"><div class="step-dot">3</div><h3>Get Results</h3><p>Instant match score, matched skills, and gaps, all in plain English.</p></div>
+    </div>
+  </section>
+  <section class="section" id="screener">
+    <div class="screener-section">
+      <div class="scr-info rv-l">
+        <div class="tag">Try it Now</div>
+        <h2 class="sec-title">Screen a resume<br><span class="gr">right now</span></h2>
+        <p class="sec-desc" style="margin:0;">Upload a resume and enter the role you are screening for to get an instant qualification check.</p>
+        <ul class="scr-list">
+          <li><span class="scr-check">✓</span>Supports PDF, DOCX, and TXT files</li>
+          <li><span class="scr-check">✓</span>13 role profiles with 50+ skills</li>
+          <li><span class="scr-check">✓</span>No data leaves your browser</li>
+        </ul>
       </div>
-      <p class="card-desc">Upload a resume and enter the role you're screening for to get an instant qualification check.</p>
-
-      <label class="field-label" for="usernameInput">Your name</label>
-      <input type="text" id="usernameInput" class="text-input" placeholder="e.g. Aisha Kumar" autocomplete="name">
-
-      <label class="field-label" for="roleInput">Target role / job title</label>
-      <input type="text" id="roleInput" class="text-input" placeholder="e.g. Software Engineer">
-
-      <label class="field-label" for="resumeInput">Resume (PDF, DOCX, or TXT)</label>
-      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload resume">
-        <div id="dzContent">
-          <div class="up-icon" aria-hidden="true"></div>
-          <div class="main">Click to upload or drag &amp; drop</div>
-          <div class="hint">PDF, DOCX or TXT — max 5MB</div>
+      <div class="card rv-r">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:18px;">Screen a resume</div><div style="font-size:11px;font-weight:600;color:var(--mint);background:rgba(0,245,212,0.08);padding:4px 10px;border-radius:6px;">Free</div></div>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 20px;">Upload a resume and enter the role you are screening for.</p>
+        <label class="lbl" for="usernameInput">Your name</label>
+        <input type="text" id="usernameInput" class="inp" placeholder="e.g. Aisha Kumar" autocomplete="name">
+        <label class="lbl" for="roleInput">Target role / job title</label>
+        <input type="text" id="roleInput" class="inp" placeholder="e.g. Software Engineer">
+        <label class="lbl" for="resumeInput">Resume (PDF, DOCX, or TXT)</label>
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload resume">
+          <div id="dzContent"><div class="dz-icon">📁</div><div class="dz-main">Click to upload or drag &amp; drop</div><div class="dz-hint">PDF, DOCX or TXT, max 5MB</div></div>
         </div>
-      </div>
-      <div class="parse-status" id="parseStatus"></div>
-      <input type="file" id="resumeInput" accept=".pdf,.docx,.txt">
-
-      <div class="err" id="errMsg">Add your name, a resume, and a target role first.</div>
-
-      <button class="submit-btn" id="screenBtn">Screen resume</button>
-
-      <div class="results" id="results">
-        <div class="greeting" id="greeting"></div>
-        <div class="verdict-banner" id="verdictBanner">
-          <span class="verdict-dot"></span>
-          <span id="verdictBannerText"></span>
-        </div>
-        <div class="score-row">
-          <div class="ring-wrap">
-            <svg width="84" height="84" viewBox="0 0 84 84">
-              <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="8"/>
-              <circle id="scoreRing" cx="42" cy="42" r="36" fill="none" stroke="#5FCB9C" stroke-width="8" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="226"/>
-            </svg>
-            <div class="ring-num" id="scoreNum">0%</div>
+        <div class="parse-st" id="parseStatus"></div>
+        <input type="file" id="resumeInput" accept=".pdf,.docx,.txt">
+        <div class="err-msg" id="errMsg">Add your name, a resume, and a target role first.</div>
+        <button class="submit-btn" id="screenBtn">Screen resume</button>
+        <div class="results" id="results">
+          <div class="greeting" id="greeting"></div>
+          <div class="verdict-bar" id="verdictBanner"><span class="v-dot"></span><span id="verdictBannerText"></span></div>
+          <div class="score-row">
+            <div class="ring-wrap"><svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/><circle id="scoreRing" cx="36" cy="36" r="30" fill="none" stroke="var(--mint)" stroke-width="7" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188"/></svg><div class="ring-num" id="scoreNum">0%</div></div>
+            <div><div class="score-lbl">Match score</div><div class="score-v" id="verdict">—</div></div>
           </div>
-          <div>
-            <div class="score-label">Match score</div>
-            <div class="score-verdict" id="verdict">—</div>
-          </div>
-        </div>
-        <div class="kw-block">
-          <div class="kw-title">Why this candidate qualifies</div>
-          <ul class="qual-points" id="qualPoints"></ul>
-        </div>
-        <div class="kw-block">
-          <div class="kw-title">Matched keywords</div>
-          <div class="kw-list" id="matchList"></div>
-        </div>
-        <div class="kw-block">
-          <div class="kw-title">Missing from resume</div>
-          <div class="kw-list" id="missList"></div>
+          <div class="kw-block"><div class="kw-title">Why this candidate qualifies</div><ul class="qual-points" id="qualPoints"></ul></div>
+          <div class="kw-block"><div class="kw-title">Matched keywords</div><div class="kw-list" id="matchList"></div></div>
+          <div class="kw-block"><div class="kw-title">Missing from resume</div><div class="kw-list" id="missList"></div></div>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="about soft-in d3">
-    <h2 class="about-title">About Resume Screener</h2>
-    <p>Resume Screener was invented by <b>Ajay</b>, who built it after watching hiring teams lose hours manually comparing resumes against job requirements. The idea was simple: give recruiters and hopeful candidates alike a fast, honest read on how well a resume lines up with a role, without needing a spreadsheet or a third-party recruiter tool.</p>
-    <p>The website works by matching the target role you enter against a set of typical requirements for that kind of position — core skills, tools, years of experience, and education level — and checking how many of them show up in the uploaded resume. It then turns that overlap into a clear match score and a plain-English list of what qualifies the candidate and what's missing.</p>
-    <p>It's built to be lightweight and private: everything happens right in the browser, there's no account to create, and no resume data is stored anywhere. Whether you're a hiring manager screening a stack of applicants or a job seeker checking your own resume before you apply, Resume Screener is meant to give you that answer in seconds, not minutes.</p>
-  </div>
-
-  <footer>Resume Screener · enter a target role and upload a text-based resume for the most accurate qualification check</footer>
+  </section>
+  <footer>Resume Screener · Enter a target role and upload a text-based resume for the most accurate qualification check</footer>
 </div>
 <script>
-  if (window['pdfjsLib']) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  }
+  if(window["pdfjsLib"]){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";}
 
-  const dropzone = document.getElementById('dropzone');
-  const resumeInput = document.getElementById('resumeInput');
-  const dzContent = document.getElementById('dzContent');
-  const usernameInput = document.getElementById('usernameInput');
-  const roleInput = document.getElementById('roleInput');
-  const screenBtn = document.getElementById('screenBtn');
-  const errMsg = document.getElementById('errMsg');
-  const parseStatus = document.getElementById('parseStatus');
-  const results = document.getElementById('results');
-  const greeting = document.getElementById('greeting');
-  const verdictBanner = document.getElementById('verdictBanner');
-  const verdictBannerText = document.getElementById('verdictBannerText');
-  const scoreRing = document.getElementById('scoreRing');
-  const scoreNum = document.getElementById('scoreNum');
-  const verdict = document.getElementById('verdict');
-  const qualPoints = document.getElementById('qualPoints');
-  const matchList = document.getElementById('matchList');
-  const missList = document.getElementById('missList');
-
-  let resumeText = '';
-  let resumeFileName = '';
-  let resumeReady = false;
-
-  dropzone.addEventListener('click', () => resumeInput.click());
-  dropzone.addEventListener('keydown', (e) => { if(e.key==='Enter'||e.key===' '){ resumeInput.click(); }});
-  ['dragover'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
-  ['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
-  dropzone.addEventListener('drop', e => {
-    if(e.dataTransfer.files.length){ resumeInput.files = e.dataTransfer.files; handleFile(e.dataTransfer.files[0]); }
-  });
-  resumeInput.addEventListener('change', () => { if(resumeInput.files.length) handleFile(resumeInput.files[0]); });
-
-  async function handleFile(file){
-    resumeFileName = file.name;
-    resumeReady = false;
-    resumeText = '';
-    dzContent.innerHTML = '<div class="filename"><span class="dz-filedot"></span>'+file.name+'</div><div class="hint">Click to replace</div>';
-    errMsg.style.display = 'none';
-    parseStatus.className = 'parse-status busy';
-    parseStatus.textContent = 'Reading resume…';
-
-    try{
-      const ext = file.name.split('.').pop().toLowerCase();
-      if(ext === 'txt'){
-        resumeText = await file.text();
-      } else if(ext === 'pdf'){
-        resumeText = await extractPdfText(file);
-      } else if(ext === 'docx'){
-        resumeText = await extractDocxText(file);
-      } else {
-        throw new Error('Unsupported file type');
-      }
-      resumeReady = true;
-      parseStatus.className = 'parse-status';
-      parseStatus.textContent = resumeText.trim() ? 'Resume read successfully (' + resumeText.trim().split(/\s+/).length + ' words).' : 'Could not find readable text in this file.';
-    } catch(err){
-      parseStatus.className = 'parse-status err';
-      parseStatus.textContent = "Couldn't read this file — try a different PDF/DOCX or paste as .txt.";
-    }
-  }
-
-  async function extractPdfText(file){
-    const buf = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
-    let text = '';
-    for(let i=1;i<=pdf.numPages;i++){
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      text += content.items.map(it => it.str).join(' ') + '\n';
-    }
-    return text;
-  }
-
-  async function extractDocxText(file){
-    const buf = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({arrayBuffer: buf});
-    return result.value || '';
-  }
-
-  /* --- role profiles: what a role typically requires, since there's no job description to read --- */
-  const ROLE_PROFILES = [
-    { keys:['software engineer','software developer','developer','programmer'],
-      skills:['javascript','python','java','git','sql','testing','problem solving','rest api'],
-      minYears:2, educationLevel:"Bachelor's degree" },
-    { keys:['frontend developer','front-end developer','front end developer','ui developer'],
-      skills:['html','css','javascript','react','git','testing'],
-      minYears:1, educationLevel:null },
-    { keys:['backend developer','back-end developer','back end developer'],
-      skills:['python','java','node','sql','aws','docker','rest api'],
-      minYears:2, educationLevel:null },
-    { keys:['full stack developer','fullstack developer','full-stack developer'],
-      skills:['javascript','react','node','sql','git','rest api'],
-      minYears:2, educationLevel:null },
-    { keys:['devops engineer','site reliability','sre'],
-      skills:['docker','kubernetes','aws','ci/cd','linux','terraform','git'],
-      minYears:2, educationLevel:null },
-    { keys:['data scientist'],
-      skills:['python','machine learning','sql','data analysis','tensorflow','pytorch'],
-      minYears:2, educationLevel:"Master's degree" },
-    { keys:['data analyst'],
-      skills:['sql','excel','tableau','power bi','data analysis'],
-      minYears:1, educationLevel:"Bachelor's degree" },
-    { keys:['product manager'],
-      skills:['communication','leadership','project management','agile','teamwork'],
-      minYears:3, educationLevel:"Bachelor's degree" },
-    { keys:['project manager'],
-      skills:['project management','communication','leadership','agile','teamwork'],
-      minYears:2, educationLevel:null },
-    { keys:['ui designer','ux designer','ui/ux designer','product designer'],
-      skills:['communication','teamwork','problem solving'],
-      minYears:1, educationLevel:null },
-    { keys:['marketing manager','marketing executive'],
-      skills:['communication','leadership','project management','teamwork'],
-      minYears:2, educationLevel:"Bachelor's degree" },
-    { keys:['sales executive','sales manager','account executive'],
-      skills:['communication','teamwork','leadership'],
-      minYears:1, educationLevel:null },
-    { keys:['hr manager','human resources','recruiter'],
-      skills:['communication','teamwork','leadership','project management'],
-      minYears:2, educationLevel:"Bachelor's degree" },
-  ];
-
-  const GENERIC_SKILLS = ['communication','teamwork','problem solving','leadership'];
-
-  const SKILL_BANK = [
-    'javascript','typescript','python','java','c++','c#','go','golang','rust','ruby','php','swift','kotlin',
-    'react','angular','vue','node','node.js','express','django','flask','spring','next.js',
-    'html','css','sql','nosql','mongodb','postgresql','mysql','redis',
-    'aws','azure','gcp','docker','kubernetes','terraform','ci/cd','git','github','linux',
-    'rest api','graphql','microservices','agile','scrum','testing','unit testing',
-    'machine learning','data analysis','tensorflow','pytorch','excel','tableau','power bi',
-    'communication','leadership','teamwork','problem solving','project management'
-  ];
-
-  /* pick the best-matching role profile for whatever the person typed, or fall back gracefully */
-  function getRequirementsForRole(role){
-    const roleLower = role.toLowerCase();
-
-    let best = null, bestScore = 0;
-    ROLE_PROFILES.forEach(profile => {
-      profile.keys.forEach(key => {
-        if(roleLower.includes(key) && key.length > bestScore){
-          bestScore = key.length;
-          best = profile;
-        }
-      });
-    });
-
-    if(best){
-      return { skills: best.skills, minYears: best.minYears, educationLevel: best.educationLevel };
-    }
-
-    // no known profile: pull any recognizable skill words directly out of the role text,
-    // otherwise fall back to generic professional skills so there's still something to check
-    const wordMatches = SKILL_BANK.filter(skill => roleLower.includes(skill));
-    return {
-      skills: wordMatches.length ? wordMatches : GENERIC_SKILLS,
-      minYears: null,
-      educationLevel: null
-    };
-  }
-
-  function analyzeResume(resumeLower, requirements){
-    const points = [];
-    const matchedSkills = requirements.skills.filter(s => resumeLower.includes(s));
-    const missingSkills = requirements.skills.filter(s => !resumeLower.includes(s));
-
-    matchedSkills.forEach(s => points.push({ok:true, text:'Has experience with ' + s}));
-    missingSkills.forEach(s => points.push({ok:false, text:'No mention of ' + s}));
-
-    let yearsMet = null;
-    if(requirements.minYears){
-      const resumeYearsMatch = resumeLower.match(/(\d+)\+?\s*years?/);
-      const resumeYears = resumeYearsMatch ? parseInt(resumeYearsMatch[1], 10) : null;
-      yearsMet = resumeYears !== null && resumeYears >= requirements.minYears;
-      if(resumeYears !== null){
-        points.push({ok: yearsMet, text: (yearsMet ? 'Meets' : 'Below') + ' the required ' + requirements.minYears + '+ years of experience (resume shows ~' + resumeYears + ')'});
-      } else {
-        points.push({ok:false, text:'Role requires ' + requirements.minYears + '+ years — resume doesn\'t clearly state years of experience'});
-      }
-    }
-
-    let educationMet = null;
-    if(requirements.educationLevel){
-      educationMet = resumeLower.includes(requirements.educationLevel.toLowerCase().split(' ')[0]);
-      points.push({ok: educationMet, text: (educationMet ? 'Meets' : 'Doesn\'t clearly show') + ' the ' + requirements.educationLevel + ' requirement'});
-    }
-
-    const totalChecks = requirements.skills.length + (requirements.minYears ? 1 : 0) + (requirements.educationLevel ? 1 : 0);
-    const passedChecks = matchedSkills.length + (yearsMet ? 1 : 0) + (educationMet ? 1 : 0);
-    const score = totalChecks ? Math.round((passedChecks/totalChecks)*100) : 0;
-
-    let verdictLevel;
-    if(score >= 70) verdictLevel = 'pass';
-    else if(score >= 40) verdictLevel = 'partial';
-    else verdictLevel = 'fail';
-
-    return { points, score, verdictLevel, matchedSkills, missingSkills };
-  }
-
-  screenBtn.addEventListener('click', () => {
-    const username = usernameInput.value.trim();
-    const role = roleInput.value.trim();
-
-    if(!username || !resumeFileName || !role){
-      errMsg.textContent = 'Add your name, a resume, and a target role first.';
-      errMsg.style.display = 'block';
-      return;
-    }
-    if(!resumeReady){
-      errMsg.textContent = "Still reading your resume — try again in a moment, or check it parsed correctly above.";
-      errMsg.style.display = 'block';
-      return;
-    }
-    errMsg.style.display = 'none';
-
-    const resumeLower = resumeText.toLowerCase();
-    const requirements = getRequirementsForRole(role);
-    const analysis = analyzeResume(resumeLower, requirements);
-
-    const score = analysis.score;
-    const circumference = 226;
-    const offset = circumference - (circumference * score / 100);
-    scoreRing.style.stroke = score >= 70 ? '#5FCB9C' : score >= 40 ? '#F2A94E' : '#F2795A';
-    scoreRing.setAttribute('stroke-dashoffset', offset);
-    scoreNum.textContent = score + '%';
-    verdict.textContent = score >= 70 ? 'Strong match' : score >= 40 ? 'Partial match' : 'Weak match';
-
-    verdictBanner.className = 'verdict-banner ' + analysis.verdictLevel;
-    const roleLabel = role || 'this role';
-    if(analysis.verdictLevel === 'pass'){
-      verdictBannerText.textContent = 'Qualified for ' + roleLabel;
-    } else if(analysis.verdictLevel === 'partial'){
-      verdictBannerText.textContent = 'Partially qualified for ' + roleLabel + ' — some gaps below';
-    } else {
-      verdictBannerText.textContent = 'Not currently qualified for ' + roleLabel;
-    }
-
-    qualPoints.innerHTML = analysis.points.length
-      ? analysis.points.map(p => '<li class="'+(p.ok?'ok':'no')+'"><span class="mark">'+(p.ok?'✓':'✗')+'</span><span>'+p.text+'</span></li>').join('')
-      : '<li class="no"><span class="mark">✗</span><span>Not enough detail in the job description to check specific requirements.</span></li>';
-
-    matchList.innerHTML = analysis.matchedSkills.length ? analysis.matchedSkills.map(k=>'<span class="kw match">'+k+'</span>').join('') : '<span class="kw miss">No overlapping keywords found</span>';
-    missList.innerHTML = analysis.missingSkills.length ? analysis.missingSkills.map(k=>'<span class="kw miss">'+k+'</span>').join('') : '<span class="kw match">Nothing missing</span>';
-
-    greeting.innerHTML = username + ', you scored <b>' + score + '%</b> on this resume';
-    greeting.style.animation = 'none';
-    void greeting.offsetWidth;
-    greeting.style.animation = '';
-
-    results.classList.add('show');
-  });
-</script>
-<script>
-  /* --- soft green live-wallpaper background --- */
+  /* PARTICLES */
   (function(){
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    let w, h, dpr;
-    let particles = [];
-
-    const COLOR = '127,232,184'; // mint rgb
-    const LINK_DIST = 150;
-    const COUNT_DIVISOR = 16000; // lower = more particles
-
+    var c=document.getElementById("particles"),x=c.getContext("2d");
+    var w,h,dpr,ps=[];
+    var C="0,245,212",LD=140;
     function resize(){
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = window.innerWidth;
-      h = window.innerHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      initParticles();
+      dpr=Math.min(devicePixelRatio||1,2);
+      w=innerWidth;h=innerHeight;
+      c.width=w*dpr;c.height=h*dpr;
+      c.style.width=w+"px";c.style.height=h+"px";
+      x.setTransform(dpr,0,0,dpr,0,0);
+      init();
     }
-
-    function initParticles(){
-      const count = Math.max(28, Math.min(70, Math.floor((w*h)/COUNT_DIVISOR)));
-      particles = new Array(count).fill(0).map(() => ({
-        x: Math.random()*w,
-        y: Math.random()*h,
-        vx: (Math.random()-0.5)*0.18,
-        vy: (Math.random()-0.5)*0.18,
-        r: Math.random()*1.6 + 1.2,
-        glow: Math.random()*0.5 + 0.5
-      }));
+    function init(){
+      ps.length=0;
+      var n=Math.max(30,Math.min(60,Math.floor(w*h/20000)));
+      for(var i=0;i<n;i++){
+        ps.push({
+          x:Math.random()*w,y:Math.random()*h,
+          vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,
+          r:Math.random()*1.5+1,g:Math.random()*.5+.5
+        });
+      }
     }
-
     function step(){
-      ctx.clearRect(0,0,w,h);
-
-      // gentle drifting particles
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if(p.x < -20) p.x = w+20; if(p.x > w+20) p.x = -20;
-        if(p.y < -20) p.y = h+20; if(p.y > h+20) p.y = -20;
+      x.clearRect(0,0,w,h);
+      ps.forEach(function(p){
+        p.x+=p.vx;p.y+=p.vy;
+        if(p.x<-20)p.x=w+20;if(p.x>w+20)p.x=-20;
+        if(p.y<-20)p.y=h+20;if(p.y>h+20)p.y=-20;
       });
-
-      // soft connecting lines
-      for(let i=0;i<particles.length;i++){
-        for(let j=i+1;j<particles.length;j++){
-          const a = particles[i], b = particles[j];
-          const dx = a.x-b.x, dy = a.y-b.y;
-          const dist = Math.sqrt(dx*dx+dy*dy);
-          if(dist < LINK_DIST){
-            const alpha = (1 - dist/LINK_DIST) * 0.14;
-            ctx.strokeStyle = `rgba(${COLOR},${alpha})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(a.x,a.y);
-            ctx.lineTo(b.x,b.y);
-            ctx.stroke();
+      for(var i=0;i<ps.length;i++){
+        for(var j=i+1;j<ps.length;j++){
+          var a=ps[i],b=ps[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);
+          if(d<LD){
+            x.strokeStyle="rgba("+C+","+(1-d/LD)*.12+")";
+            x.lineWidth=1;x.beginPath();
+            x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();
           }
         }
       }
-
-      // glowing dots
-      particles.forEach(p => {
-        const grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*6);
-        grad.addColorStop(0, `rgba(${COLOR},${0.35*p.glow})`);
-        grad.addColorStop(1, `rgba(${COLOR},0)`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r*6,0,Math.PI*2);
-        ctx.fill();
-
-        ctx.fillStyle = `rgba(${COLOR},${0.8*p.glow})`;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fill();
+      ps.forEach(function(p){
+        var g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*6);
+        g.addColorStop(0,"rgba("+C+","+0.3*p.g+")");
+        g.addColorStop(1,"rgba("+C+",0)");
+        x.fillStyle=g;x.beginPath();
+        x.arc(p.x,p.y,p.r*6,0,Math.PI*2);x.fill();
+        x.fillStyle="rgba("+C+","+0.7*p.g+")";
+        x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fill();
       });
-
       requestAnimationFrame(step);
     }
-
-    window.addEventListener('resize', resize);
+    addEventListener("resize",resize);
     resize();
     requestAnimationFrame(step);
   })();
+
+  /* SCROLL REVEAL */
+  var rvEls=document.querySelectorAll(".rv,.rv-l,.rv-r,.rv-s");
+  var rvObs=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add("v");
+        rvObs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.05,rootMargin:"50px 0px 0px 0px"});
+  rvEls.forEach(function(el){rvObs.observe(el);});
+
+  /* Fallback: reveal all elements already in viewport on load */
+  function checkVisible(){
+    rvEls.forEach(function(el){
+      var r=el.getBoundingClientRect();
+      if(r.top<window.innerHeight+50 && r.bottom>-50){
+        el.classList.add("v");
+      }
+    });
+  }
+  checkVisible();
+  setTimeout(checkVisible,300);
+  setTimeout(checkVisible,1000);
+
+  /* NAV SCROLL */
+  var mainNav=document.getElementById("mainNav");
+  addEventListener("scroll",function(){
+    mainNav.classList.toggle("scrolled",scrollY>50);
+  });
+
+  /* HOLOGRAM PARALLAX */
+  var holoVideo=document.getElementById("hologramVideo");
+  var floatCards=document.querySelectorAll(".float-card");
+  addEventListener("scroll",function(){
+    var s=scrollY;
+    var rate=s*.0003;
+    holoVideo.style.transform="translateY("+(-s*.05)+"px) rotateY("+rate*20+"deg)";
+    floatCards.forEach(function(c,i){
+      var dir=i%2===0?1:-1;
+      c.style.transform="translateY("+(-s*.03*(i+1)*.3)+"px) translateX("+dir*(Math.sin(s*.002+i)*15)+"px)";
+    });
+  });
+
+  /* CURSOR ORB */
+  var orb=document.getElementById("cursorOrb");
+  addEventListener("mousemove",function(e){
+    orb.style.left=e.clientX+"px";
+    orb.style.top=e.clientY+"px";
+  });
+  addEventListener("mouseleave",function(){orb.style.opacity="0";});
+  addEventListener("mouseenter",function(){orb.style.opacity="1";});
+
+  /* FILE HANDLING */
+  var dropzone=document.getElementById("dropzone");
+  var resumeInput=document.getElementById("resumeInput");
+  var dzContent=document.getElementById("dzContent");
+  var usernameInput=document.getElementById("usernameInput");
+  var roleInput=document.getElementById("roleInput");
+  var screenBtn=document.getElementById("screenBtn");
+  var errMsg=document.getElementById("errMsg");
+  var parseStatus=document.getElementById("parseStatus");
+  var results=document.getElementById("results");
+  var greeting=document.getElementById("greeting");
+  var verdictBanner=document.getElementById("verdictBanner");
+  var verdictBannerText=document.getElementById("verdictBannerText");
+  var scoreRing=document.getElementById("scoreRing");
+  var scoreNum=document.getElementById("scoreNum");
+  var verdict=document.getElementById("verdict");
+  var qualPoints=document.getElementById("qualPoints");
+  var matchList=document.getElementById("matchList");
+  var missList=document.getElementById("missList");
+
+  var resumeText="";
+  var resumeFileName="";
+  var resumeReady=false;
+
+  dropzone.addEventListener("click",function(){resumeInput.click();});
+  dropzone.addEventListener("keydown",function(e){
+    if(e.key==="Enter"||e.key===" "){resumeInput.click();}
+  });
+  dropzone.addEventListener("dragover",function(e){
+    e.preventDefault();dropzone.classList.add("drag");
+  });
+  dropzone.addEventListener("dragleave",function(e){
+    e.preventDefault();dropzone.classList.remove("drag");
+  });
+  dropzone.addEventListener("drop",function(e){
+    e.preventDefault();dropzone.classList.remove("drag");
+    if(e.dataTransfer.files.length){
+      resumeInput.files=e.dataTransfer.files;
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+  resumeInput.addEventListener("change",function(){
+    if(resumeInput.files.length) handleFile(resumeInput.files[0]);
+  });
+
+  function handleFile(file){
+    resumeFileName=file.name;
+    resumeReady=false;
+    resumeText="";
+    dzContent.innerHTML='<div class="dz-file"><span class="dz-dot"></span>'+file.name+'</div><div class="dz-hint">Click to replace</div>';
+    errMsg.style.display="none";
+    parseStatus.className="parse-st busy";
+    parseStatus.textContent="Reading resume\u2026";
+    var ext=file.name.split(".").pop().toLowerCase();
+    if(ext==="txt"){
+      file.text().then(function(t){onTextLoaded(t);});
+    } else if(ext==="pdf"){
+      extractPdfText(file).then(function(t){onTextLoaded(t);}).catch(function(){onTextError();});
+    } else if(ext==="docx"){
+      extractDocxText(file).then(function(t){onTextLoaded(t);}).catch(function(){onTextError();});
+    } else {
+      onTextError();
+    }
+  }
+
+  function onTextLoaded(text){
+    resumeText=text;
+    resumeReady=true;
+    parseStatus.className="parse-st";
+    var words=text.trim().split(/\s+/).length;
+    parseStatus.textContent=text.trim()?"Resume read successfully ("+words+" words).":"Could not find readable text in this file.";
+  }
+
+  function onTextError(){
+    parseStatus.className="parse-st err";
+    parseStatus.textContent="Could not read this file. Try a different PDF/DOCX or paste as .txt.";
+  }
+
+  function extractPdfText(file){
+    return file.arrayBuffer().then(function(buf){
+      return pdfjsLib.getDocument({data:buf}).promise.then(function(pdf){
+        var text="";
+        var promises=[];
+        for(var i=1;i<=pdf.numPages;i++){
+          promises.push(pdf.getPage(i).then(function(page){
+            return page.getTextContent().then(function(content){
+              text+=content.items.map(function(it){return it.str;}).join(" ")+"\n";
+            });
+          }));
+        }
+        return Promise.all(promises).then(function(){return text;});
+      });
+    });
+  }
+
+  function extractDocxText(file){
+    return file.arrayBuffer().then(function(buf){
+      return mammoth.extractRawText({arrayBuffer:buf}).then(function(result){
+        return result.value||"";
+      });
+    });
+  }
+
+  /* ROLE PROFILES */
+  var ROLE_PROFILES=[
+    {keys:["software engineer","software developer","developer","programmer"],
+     skills:["javascript","python","java","git","sql","testing","problem solving","rest api"],
+     minYears:2,educationLevel:"Bachelor's degree"},
+    {keys:["frontend developer","front-end developer","front end developer","ui developer"],
+     skills:["html","css","javascript","react","git","testing"],
+     minYears:1,educationLevel:null},
+    {keys:["backend developer","back-end developer","back end developer"],
+     skills:["python","java","node","sql","aws","docker","rest api"],
+     minYears:2,educationLevel:null},
+    {keys:["full stack developer","fullstack developer","full-stack developer"],
+     skills:["javascript","react","node","sql","git","rest api"],
+     minYears:2,educationLevel:null},
+    {keys:["devops engineer","site reliability","sre"],
+     skills:["docker","kubernetes","aws","ci/cd","linux","terraform","git"],
+     minYears:2,educationLevel:null},
+    {keys:["data scientist"],
+     skills:["python","machine learning","sql","data analysis","tensorflow","pytorch"],
+     minYears:2,educationLevel:"Master's degree"},
+    {keys:["data analyst"],
+     skills:["sql","excel","tableau","power bi","data analysis"],
+     minYears:1,educationLevel:"Bachelor's degree"},
+    {keys:["product manager"],
+     skills:["communication","leadership","project management","agile","teamwork"],
+     minYears:3,educationLevel:"Bachelor's degree"},
+    {keys:["project manager"],
+     skills:["project management","communication","leadership","agile","teamwork"],
+     minYears:2,educationLevel:null},
+    {keys:["ui designer","ux designer","ui/ux designer","product designer"],
+     skills:["communication","teamwork","problem solving"],
+     minYears:1,educationLevel:null},
+    {keys:["marketing manager","marketing executive"],
+     skills:["communication","leadership","project management","teamwork"],
+     minYears:2,educationLevel:"Bachelor's degree"},
+    {keys:["sales executive","sales manager","account executive"],
+     skills:["communication","teamwork","leadership"],
+     minYears:1,educationLevel:null},
+    {keys:["hr manager","human resources","recruiter"],
+     skills:["communication","teamwork","leadership","project management"],
+     minYears:2,educationLevel:"Bachelor's degree"}
+  ];
+  var GENERIC_SKILLS=["communication","teamwork","problem solving","leadership"];
+  var SKILL_BANK=["javascript","typescript","python","java","c++","c#","go","golang","rust","ruby","php","swift","kotlin","react","angular","vue","node","node.js","express","django","flask","spring","next.js","html","css","sql","nosql","mongodb","postgresql","mysql","redis","aws","azure","gcp","docker","kubernetes","terraform","ci/cd","git","github","linux","rest api","graphql","microservices","agile","scrum","testing","unit testing","machine learning","data analysis","tensorflow","pytorch","excel","tableau","power bi","communication","leadership","teamwork","problem solving","project management"];
+
+  function getRequirementsForRole(role){
+    var rl=role.toLowerCase();
+    var best=null,bs=0;
+    ROLE_PROFILES.forEach(function(p){
+      p.keys.forEach(function(k){
+        if(rl.indexOf(k)!==-1 && k.length>bs){bs=k.length;best=p;}
+      });
+    });
+    if(best) return {skills:best.skills,minYears:best.minYears,educationLevel:best.educationLevel};
+    var wm=SKILL_BANK.filter(function(s){return rl.indexOf(s)!==-1;});
+    return {skills:wm.length?wm:GENERIC_SKILLS,minYears:null,educationLevel:null};
+  }
+
+  function analyzeResume(rl,req){
+    var pts=[];
+    var ms=req.skills.filter(function(s){return rl.indexOf(s)!==-1;});
+    var mm=req.skills.filter(function(s){return rl.indexOf(s)===-1;});
+    ms.forEach(function(s){pts.push({ok:true,text:"Has experience with "+s});});
+    mm.forEach(function(s){pts.push({ok:false,text:"No mention of "+s});});
+    var ym=null;
+    if(req.minYears){
+      var ry=rl.match(/(\d+)\+?\s*years?/);
+      var y=ry?parseInt(ry[1],10):null;
+      ym=y!==null && y>=req.minYears;
+      if(y!==null){
+        pts.push({ok:ym,text:(ym?"Meets":"Below")+" the "+req.minYears+"+ years requirement (shows ~"+y+")"});
+      } else {
+        pts.push({ok:false,text:"Role requires "+req.minYears+"+ years, not clearly stated"});
+      }
+    }
+    var em=null;
+    if(req.educationLevel){
+      em=rl.indexOf(req.educationLevel.toLowerCase().split(" ")[0])!==-1;
+      pts.push({ok:em,text:(em?"Meets":"Doesn't show")+" the "+req.educationLevel+" requirement"});
+    }
+    var tc=req.skills.length+(req.minYears?1:0)+(req.educationLevel?1:0);
+    var pc=ms.length+(ym?1:0)+(em?1:0);
+    var score=tc?Math.round(pc/tc*100):0;
+    var vl;
+    if(score>=70) vl="pass";
+    else if(score>=40) vl="partial";
+    else vl="fail";
+    return {pts:pts,score:score,vl:vl,ms:ms,mm:mm};
+  }
+
+  /* SCREEN BUTTON */
+  screenBtn.addEventListener("click",function(){
+    var un=usernameInput.value.trim();
+    var role=roleInput.value.trim();
+    if(!un||!resumeFileName||!role){
+      errMsg.textContent="Add your name, a resume, and a target role first.";
+      errMsg.style.display="block";
+      return;
+    }
+    if(!resumeReady){
+      errMsg.textContent="Still reading your resume. Try again in a moment.";
+      errMsg.style.display="block";
+      return;
+    }
+    errMsg.style.display="none";
+
+    var rl=resumeText.toLowerCase();
+    var req=getRequirementsForRole(role);
+    var a=analyzeResume(rl,req);
+    var sc=a.score;
+    var circ=188;
+    var off=circ-(circ*sc/100);
+    scoreRing.style.stroke=sc>=70?"#00f5d4":sc>=40?"#fee440":"#f15bb5";
+    scoreRing.setAttribute("stroke-dashoffset",off);
+    scoreNum.textContent=sc+"%";
+    verdict.textContent=sc>=70?"Strong match":sc>=40?"Partial match":"Weak match";
+
+    verdictBanner.className="verdict-bar "+a.vl;
+    var rl2=role||"this role";
+    if(a.vl==="pass") verdictBannerText.textContent="Qualified for "+rl2;
+    else if(a.vl==="partial") verdictBannerText.textContent="Partially qualified for "+rl2+" \u2014 some gaps";
+    else verdictBannerText.textContent="Not currently qualified for "+rl2;
+
+    var html="";
+    if(a.pts.length){
+      a.pts.forEach(function(p){
+        html+='<li class="'+(p.ok?"ok":"no")+'"><span class="mk">'+(p.ok?"\u2713":"\u2717")+'</span><span>'+p.text+'</span></li>';
+      });
+    } else {
+      html='<li class="no"><span class="mk">\u2717</span><span>Not enough detail to check requirements.</span></li>';
+    }
+    qualPoints.innerHTML=html;
+
+    if(a.mm.length){
+      matchList.innerHTML=a.mm.map(function(k){return '<span class="kw match">'+k+'</span>';}).join("");
+    } else {
+      matchList.innerHTML='<span class="kw miss">No overlapping keywords found</span>';
+    }
+    if(a.mm.length){
+      missList.innerHTML=a.mm.map(function(k){return '<span class="kw miss">'+k+'</span>';}).join("");
+    } else {
+      missList.innerHTML='<span class="kw match">Nothing missing</span>';
+    }
+
+    greeting.innerHTML=un+', you scored <b>'+sc+'%</b> on this resume';
+    greeting.style.animation="none";
+    void greeting.offsetWidth;
+    greeting.style.animation="";
+    results.classList.add("show");
+  });
 </script>
 </body>
 </html>
