@@ -152,6 +152,10 @@
     .qual-points li:hover{transform:translateX(3px);}
     .qual-points .mk{flex:none;font-weight:700;width:14px;font-size:12px;}
     .qual-points li.ok .mk{color:var(--mint);}.qual-points li.no .mk{color:var(--pink);}
+    /* ABOUT */
+    .about-section{max-width:760px;margin:0 auto;}
+    .about-section p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:20px;}
+    .about-section p:last-child{margin-bottom:0;}
     /* FOOTER */
     footer{padding:40px 48px;border-top:1px solid rgba(255,255,255,0.04);text-align:center;font-size:12px;color:rgba(255,255,255,0.25);position:relative;z-index:1;}
     /* SCROLL REVEAL */
@@ -175,7 +179,7 @@
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#how">How it Works</a>
-      <a href="#screener">Try it</a>
+      <a href="#about">About</a>
       <a href="#screener" class="nav-cta">Screen Now</a>
     </div>
   </nav>
@@ -268,6 +272,17 @@
           <div class="kw-block"><div class="kw-title">Missing from resume</div><div class="kw-list" id="missList"></div></div>
         </div>
       </div>
+    </div>
+  </section>
+  <section class="section" id="about">
+    <div class="section-center">
+      <div class="tag rv">About Resume Screener</div>
+      <h2 class="sec-title rv">The story behind<br><span class="gr">the screen</span></h2>
+    </div>
+    <div class="about-section">
+      <p class="rv">Resume Screener was invented by Ajay, who built it after watching hiring teams lose hours manually comparing resumes against job requirements. The idea was simple: give recruiters and hopeful candidates alike a fast, honest read on how well a resume lines up with a role, without needing a spreadsheet or a third-party recruiter tool.</p>
+      <p class="rv">The website works by matching the target role you enter against a set of typical requirements for that kind of position — core skills, tools, years of experience, and education level — and checking how many of them show up in the uploaded resume. It then turns that overlap into a clear match score and a plain-English list of what qualifies the candidate and what's missing.</p>
+      <p class="rv">It's built to be lightweight and private: everything happens right in the browser, there's no account to create, and no resume data is stored anywhere. Whether you're a hiring manager screening a stack of applicants or a job seeker checking your own resume before you apply, Resume Screener is meant to give you that answer in seconds, not minutes.</p>
     </div>
   </section>
   <footer>Resume Screener · Role profiles reflect trending 2026 jobs · Enter a target role and upload a text-based resume for the most accurate qualification check</footer>
