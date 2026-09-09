@@ -183,7 +183,7 @@
     <div class="hero-content">
       <div class="hero-badge rv"><span class="pulse"></span>AI-Powered Resume Screening</div>
       <h1 class="rv">Screen every resume<br><span class="gradient">before your coffee gets cold</span></h1>
-      <p class="hero-sub rv">Drop in a resume and the role you are hiring for. Get a match score, matched skills, and gaps in seconds.</p>
+      <p class="hero-sub rv">Drop in a resume and the role you are hiring for. Get a match score, matched skills, and gaps in seconds — tuned to today's trending roles.</p>
       <div class="hero-btns rv">
         <a href="#screener" class="btn-glow">Start Screening</a>
         <a href="#how" class="btn-outline">See How it Works</a>
@@ -214,7 +214,7 @@
       <div class="feat-card rv"><div class="feat-icon">📦</div><h3>Multi-Format Support</h3><p>Upload PDF, DOCX, or TXT files. Everything happens in the browser.</p></div>
       <div class="feat-card rv"><div class="feat-icon">📊</div><h3>Clear Match Score</h3><p>Visual score ring with pass/partial/fail verdict plus detailed breakdown.</p></div>
       <div class="feat-card rv"><div class="feat-icon">🔒</div><h3>100% Private</h3><p>No accounts, no data storage. Everything runs locally in your browser.</p></div>
-      <div class="feat-card rv"><div class="feat-icon">🎯</div><h3>Zero Setup</h3><p>No software to install. Just open the page and start screening resumes.</p></div>
+      <div class="feat-card rv"><div class="feat-icon">🎯</div><h3>Trending Roles Built In</h3><p>Profiles cover 2026's most in-demand jobs — AI, cybersecurity, cloud, and healthcare.</p></div>
     </div>
   </section>
   <section class="section" id="how">
@@ -237,7 +237,7 @@
         <p class="sec-desc" style="margin:0;">Upload a resume and enter the role you are screening for to get an instant qualification check.</p>
         <ul class="scr-list">
           <li><span class="scr-check">✓</span>Supports PDF, DOCX, and TXT files</li>
-          <li><span class="scr-check">✓</span>13 role profiles with 50+ skills</li>
+          <li><span class="scr-check">✓</span>18 trending role profiles with 70+ skills</li>
           <li><span class="scr-check">✓</span>No data leaves your browser</li>
         </ul>
       </div>
@@ -247,7 +247,7 @@
         <label class="lbl" for="usernameInput">Your name</label>
         <input type="text" id="usernameInput" class="inp" placeholder="e.g. Aisha Kumar" autocomplete="name">
         <label class="lbl" for="roleInput">Target role / job title</label>
-        <input type="text" id="roleInput" class="inp" placeholder="e.g. Software Engineer">
+        <input type="text" id="roleInput" class="inp" placeholder="e.g. AI Engineer, Cybersecurity Analyst">
         <label class="lbl" for="resumeInput">Resume (PDF, DOCX, or TXT)</label>
         <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload resume">
           <div id="dzContent"><div class="dz-icon">📁</div><div class="dz-main">Click to upload or drag &amp; drop</div><div class="dz-hint">PDF, DOCX or TXT, max 5MB</div></div>
@@ -270,7 +270,7 @@
       </div>
     </div>
   </section>
-  <footer>Resume Screener · Enter a target role and upload a text-based resume for the most accurate qualification check</footer>
+  <footer>Resume Screener · Role profiles reflect trending 2026 jobs · Enter a target role and upload a text-based resume for the most accurate qualification check</footer>
 </div>
 <script>
   if(window["pdfjsLib"]){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";}
@@ -488,8 +488,31 @@
     });
   }
 
-  /* ROLE PROFILES */
+  /* ROLE PROFILES — updated to reflect 2026's most in-demand / trending jobs
+     (AI & ML, cybersecurity, cloud & data, plus healthcare and sustainability,
+     which dominate 2026 hiring data from Indeed, Coursera, and BLS projections) */
   var ROLE_PROFILES=[
+    {keys:["ai engineer","artificial intelligence engineer","machine learning engineer","ml engineer"],
+     skills:["python","machine learning","pytorch","tensorflow","llm","prompt engineering","mlops","sql","deep learning"],
+     minYears:2,educationLevel:"Bachelor's degree"},
+    {keys:["data scientist"],
+     skills:["python","machine learning","sql","data analysis","statistics","pytorch","tensorflow","communication"],
+     minYears:2,educationLevel:"Master's degree"},
+    {keys:["data engineer"],
+     skills:["python","sql","etl","spark","airflow","aws","data warehousing","cloud"],
+     minYears:2,educationLevel:"Bachelor's degree"},
+    {keys:["data analyst"],
+     skills:["sql","excel","tableau","power bi","data analysis","python"],
+     minYears:1,educationLevel:"Bachelor's degree"},
+    {keys:["cybersecurity analyst","security analyst","information security analyst","infosec analyst"],
+     skills:["network security","siem","incident response","penetration testing","firewalls","risk assessment","cloud security","compliance"],
+     minYears:2,educationLevel:"Bachelor's degree"},
+    {keys:["cloud engineer","cloud architect"],
+     skills:["aws","azure","gcp","kubernetes","docker","terraform","ci/cd","networking","linux"],
+     minYears:3,educationLevel:"Bachelor's degree"},
+    {keys:["devops engineer","site reliability","sre"],
+     skills:["docker","kubernetes","aws","ci/cd","linux","terraform","git","monitoring"],
+     minYears:2,educationLevel:null},
     {keys:["software engineer","software developer","developer","programmer"],
      skills:["javascript","python","java","git","sql","testing","problem solving","rest api"],
      minYears:2,educationLevel:"Bachelor's degree"},
@@ -502,36 +525,30 @@
     {keys:["full stack developer","fullstack developer","full-stack developer"],
      skills:["javascript","react","node","sql","git","rest api"],
      minYears:2,educationLevel:null},
-    {keys:["devops engineer","site reliability","sre"],
-     skills:["docker","kubernetes","aws","ci/cd","linux","terraform","git"],
-     minYears:2,educationLevel:null},
-    {keys:["data scientist"],
-     skills:["python","machine learning","sql","data analysis","tensorflow","pytorch"],
-     minYears:2,educationLevel:"Master's degree"},
-    {keys:["data analyst"],
-     skills:["sql","excel","tableau","power bi","data analysis"],
-     minYears:1,educationLevel:"Bachelor's degree"},
     {keys:["product manager"],
-     skills:["communication","leadership","project management","agile","teamwork"],
+     skills:["communication","leadership","project management","agile","teamwork","data analysis"],
      minYears:3,educationLevel:"Bachelor's degree"},
-    {keys:["project manager"],
-     skills:["project management","communication","leadership","agile","teamwork"],
-     minYears:2,educationLevel:null},
     {keys:["ui designer","ux designer","ui/ux designer","product designer"],
-     skills:["communication","teamwork","problem solving"],
+     skills:["communication","teamwork","problem solving","figma","user research"],
      minYears:1,educationLevel:null},
-    {keys:["marketing manager","marketing executive"],
-     skills:["communication","leadership","project management","teamwork"],
+    {keys:["registered nurse","nurse practitioner","rn"],
+     skills:["patient care","clinical assessment","electronic health records","communication","critical care","medication administration"],
+     minYears:1,educationLevel:"Bachelor's degree"},
+    {keys:["occupational therapist"],
+     skills:["patient care","rehabilitation","clinical assessment","communication","treatment planning"],
+     minYears:1,educationLevel:"Master's degree"},
+    {keys:["health services manager","healthcare administrator"],
+     skills:["leadership","project management","communication","budgeting","compliance","healthcare operations"],
+     minYears:3,educationLevel:"Bachelor's degree"},
+    {keys:["sustainability specialist","sustainability manager","esg analyst"],
+     skills:["sustainability reporting","esg","data analysis","communication","project management","regulatory compliance"],
      minYears:2,educationLevel:"Bachelor's degree"},
-    {keys:["sales executive","sales manager","account executive"],
-     skills:["communication","teamwork","leadership"],
-     minYears:1,educationLevel:null},
     {keys:["hr manager","human resources","recruiter"],
      skills:["communication","teamwork","leadership","project management"],
      minYears:2,educationLevel:"Bachelor's degree"}
   ];
   var GENERIC_SKILLS=["communication","teamwork","problem solving","leadership"];
-  var SKILL_BANK=["javascript","typescript","python","java","c++","c#","go","golang","rust","ruby","php","swift","kotlin","react","angular","vue","node","node.js","express","django","flask","spring","next.js","html","css","sql","nosql","mongodb","postgresql","mysql","redis","aws","azure","gcp","docker","kubernetes","terraform","ci/cd","git","github","linux","rest api","graphql","microservices","agile","scrum","testing","unit testing","machine learning","data analysis","tensorflow","pytorch","excel","tableau","power bi","communication","leadership","teamwork","problem solving","project management"];
+  var SKILL_BANK=["javascript","typescript","python","java","c++","c#","go","golang","rust","ruby","php","swift","kotlin","react","angular","vue","node","node.js","express","django","flask","spring","next.js","html","css","sql","nosql","mongodb","postgresql","mysql","redis","aws","azure","gcp","docker","kubernetes","terraform","ci/cd","git","github","linux","rest api","graphql","microservices","agile","scrum","testing","unit testing","machine learning","deep learning","pytorch","tensorflow","llm","prompt engineering","mlops","data analysis","etl","spark","airflow","data warehousing","network security","siem","incident response","penetration testing","firewalls","risk assessment","cloud security","compliance","excel","tableau","power bi","figma","user research","patient care","clinical assessment","electronic health records","critical care","medication administration","rehabilitation","treatment planning","healthcare operations","sustainability reporting","esg","regulatory compliance","budgeting","communication","leadership","teamwork","problem solving","project management"];
 
   function getRequirementsForRole(role){
     var rl=role.toLowerCase();
