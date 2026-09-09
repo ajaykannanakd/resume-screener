@@ -621,8 +621,8 @@
     }
     qualPoints.innerHTML=html;
 
-    if(a.mm.length){
-      matchList.innerHTML=a.mm.map(function(k){return '<span class="kw match">'+k+'</span>';}).join("");
+    if(a.ms.length){
+      matchList.innerHTML=a.ms.map(function(k){return '<span class="kw match">'+k+'</span>';}).join("");
     } else {
       matchList.innerHTML='<span class="kw miss">No overlapping keywords found</span>';
     }
