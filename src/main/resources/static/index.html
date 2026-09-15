@@ -73,7 +73,6 @@
     .section{padding:120px 48px;position:relative;z-index:1;}
     .section-center{text-align:center;max-width:680px;margin:0 auto;}
     .tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--mint);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:16px;}
-    .tag::before{content:'';width:20px;height:2px;background:var(--mint);border-radius:1px;}
     .sec-title{font-family:Space Grotesk,sans-serif;font-weight:700;font-size:48px;line-height:1.08;letter-spacing:-0.03em;margin:0 0 16px;}
     .sec-title .gr{background:linear-gradient(135deg,var(--mint),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
     .sec-desc{font-size:17px;color:var(--muted);max-width:500px;margin:0 auto 56px;line-height:1.7;}
@@ -231,7 +230,7 @@
       <div class="step rv"><div class="step-dot">3</div><h3>Get Results</h3><p>Instant match score, matched skills, and gaps, all in plain English.</p></div>
     </div>
   </section>
-  <section class="section" id="screener">
+    <section class="section" id="screener">
     <div class="screener-section">
       <div class="scr-info rv-l">
         <div class="tag">Try it Now</div>
@@ -244,11 +243,11 @@
         </ul>
       </div>
       <div class="card rv-r">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:18px;">Screen a resume</div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div style="font-family:Space Grotesk,sans-serif;font-weight:700;font-size:18px;">Screen a resume</div><div style="font-size:11px;font-weight:600;color:var(--mint);background:rgba(0,245,212,0.08);padding:4px 10px;border-radius:6px;">Free</div> </div>
         <p style="font-size:13px;color:var(--muted);margin:4px 0 20px;">Upload a resume and enter the role you are screening for.</p>
         <label class="lbl" for="usernameInput">Your name</label>
         <input type="text" id="usernameInput" class="inp" placeholder="e.g. Aisha Kumar" autocomplete="name">
-        <label class="lbl" for="roleInput">Target role / job title</label>
+        <label class="lbl" for="roleInput">Target role / Job title</label>
         <input type="text" id="roleInput" class="inp" placeholder="e.g. AI Engineer, Cybersecurity Analyst">
         <label class="lbl" for="resumeInput">Resume (PDF, DOCX, or TXT)</label>
         <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload resume">
