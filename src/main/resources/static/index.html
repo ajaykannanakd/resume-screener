@@ -31,8 +31,8 @@
     .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:120px 48px 80px;}
     .hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 40%,rgba(0,245,212,0.08),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(155,93,229,0.06),transparent 50%);pointer-events:none;}
     .hero-content{position:relative;z-index:2;text-align:center;max-width:700px;}
-    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.15);padding:6px 16px;border-radius:100px;font-size:12px;color:var(--mint);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:24px;animation:floatBadge 3s ease-in-out infinite;}
-    .hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--mint);}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.15);padding:6px 16px;border-radius:100px;font-size:12px;color:var(--mint);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:24px;}
+    .hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:pulse 2s infinite;}
     @keyframes floatBadge{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);}}
     @keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(0,245,212,0.3);}50%{box-shadow:0 0 60px rgba(0,245,212,0.6);}}
